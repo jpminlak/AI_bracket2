@@ -1,0 +1,6 @@
+# ex. pip freeze > requirements.txt
+# => 그러나 아래 3개 라이브러리만 필요하므로 금번 실습에서는 아래 내용만 따로 저장후 github로 전송
+
+flask
+pymysql
+gunicorn

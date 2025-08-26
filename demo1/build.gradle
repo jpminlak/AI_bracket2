@@ -25,11 +25,10 @@ repositories {
 }
 
 dependencies {
-	//implementation 'org.springframework.boot:spring-boot-starter-security'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
     implementation 'nz.net.ultraq.thymeleaf:thymeleaf-layout-dialect'
-    //implementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter:3.0.3' // 버전은 최신 버전으로 변경 가능
+    //implementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter:3.0.3' // MyBatis. 현재 JPA 사용중이라 주석 처리.
     implementation 'org.springframework.boot:spring-boot-starter-jdbc' // JDBC 기능 사용 시 필요
     implementation 'org.mariadb.jdbc:mariadb-java-client:3.3.3'
 

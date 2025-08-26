@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="https://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<body>
+    <!-- 상단 네비게이션 -->
+    <header th:fragment="header">
+        <!-- <div class="welcome">
+            <span sec:authorize="isAnonymous()">음식 추천 서비스에 오신 것을 환영합니다.</span>
+            <span sec:authorize="isAuthenticated()" th:value="${username}+'님 환영합니다!'" /></span>
+        </div> -->
+        <div class="welcome">
+            <span sec:authorize="isAnonymous()">음식 추천 서비스에 오신 것을 환영합니다.</span>
+            <span sec:authorize="isAuthenticated()">
+                <span th:text="${#authentication.principal.member.username}"></span>님 환영합니다!
+            </span>
+        </div>
+        <nav>
+            <a href="/">메인 메뉴</a>
+            <a href="/photo">사진 분석</a>
+            <a href="/nutrition">영양소 분석</a>
+            <a href="/meal">추천 식단</a>
+            <a href="/record">기록</a>
+        </nav>
+        <div>
+            <button onclick="location.href='/member'">회원정보</button>
+            <span>
+                <button sec:authorize="isAnonymous()" th:onclick="|location.href='@{/member/login}'|">로그인</button>
+                <form th:action="@{/member/logout}" method="post" sec:authorize="isAuthenticated()"
+                    style="display:inline;">
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                    <button type="submit">로그아웃</button>
+                </form>
+            </span>
+            <button onclick="location.href='/member/signup'">회원 가입</button>
+        </div>
+    </header>
+
+    <!-- 푸터 -->
+    <footer th:fragment="footer">
+        <div>
+            <h4>고객지원</h4>
+            <a href="/qna">자주 묻는 질문</a>
+            <a href="/guide">이용가이드</a>
+            <a href="/centre">고객센터</a>
+            <a href="/inquiry">문의하기</a>
+        </div>
+        <div>
+            <h4>회사정보</h4>
+            <a href="/introduce">회사소개</a>
+            <a href="/terms">이용약관</a>
+            <a href="/personalinfo">개인정보처리방침</a>
+            <a href="/notice">공지사항</a>
+        </div>
+        <div>
+            <h4>연락처</h4>
+            <p>주소: 서울특별시 ○○구 ○○동 123-45</p>
+            <p>전화: 02-123-4567</p>
+            <p>이메일: contact@ooo.com</p>
+        </div>
+        <div class="footer-bottom">
+            © 2025 ○○○ 회사. All rights reserved.
+        </div>
+    </footer>
+</body>
+
+</html>

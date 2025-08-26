@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="kor" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>음식 분석 & 추천 - 로그인</title>
+    <link rel="stylesheet" th:href="@{/main.css}">
+</head>
+<style>
+    /* 회원가입 컨테이너 */
+    .signup-container {
+        display: flex;
+        justify-content: center;
+        padding: 40px 0;
+    }
+
+    .signup-box {
+        background: #fff;
+        padding: 40px;
+        border-radius: 12px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        width: 30%;
+    }
+
+    .signup-box h2 {
+        text-align: center;
+        margin-bottom: 20px;
+    }
+
+    .signup-box form {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .signup-box label {
+        margin: 10px 0 5px;
+        font-weight: bold;
+    }
+
+    .signup-box input {
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 6px;
+        font-size: 14px;
+    }
+
+    .signup-box input:focus {
+        outline: none;
+        border-color: #007bff;
+        box-shadow: 0 0 4px rgba(0, 123, 255, 0.3);
+    }
+
+    .signup-box button {
+        margin-top: 20px;
+        padding: 12px;
+        border: none;
+        background: #0b0b1a;
+        color: white;
+        font-size: 16px;
+        font-weight: bold;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: 0.3s;
+    }
+
+    .signup-box button:hover {
+        background: #333;
+    }
+
+    .signup-box p {
+        text-align: center;
+        margin-top: 15px;
+        font-size: 14px;
+    }
+
+    .signup-box a {
+        color: #007bff;
+        text-decoration: none;
+    }
+
+    .signup-box a:hover {
+        text-decoration: underline;
+    }
+
+    form {
+        font-size: 14px;
+    }
+
+    .form-row {
+        display: flex;
+        align-items: center;
+        margin-bottom: 15px;
+    }
+
+    .form-row label {
+        width: 120px;
+        font-weight: bold;
+    }
+
+    .form-row input {
+        flex: 1;
+        padding: 8px;
+        margin-right: 20px;
+        border: 1px solid #ccc;
+        border-radius: 6px;
+    }
+
+    .form-row input:last-child {
+        margin-right: 0;
+    }
+
+    /*button {
+        margin-top: 20px;
+        padding: 12px;
+        border: none;
+        background: #0b0b1a;
+        color: white;
+        font-size: 16px;
+        font-weight: bold;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: 0.3s;
+        width: 100%;
+    }
+
+    button:hover {
+        background: #333;
+    }*/
+</style>
+
+<body>
+    <!-- 상단 네비게이션 -->
+    <header th:replace="~{common:: header}"></header>
+
+    <!-- 메인 콘텐츠 -->
+    <main>
+        <div class="signup-container">
+            <div class="signup-box">
+                <h2>로그인</h2>
+                <form th:action="@{/member/login}" method="post">
+                    <div>
+                        <div class="form-row">
+                            <label for="memberId">ID</label>
+                            <input type="text" id="memberId" name="memberId">
+                        </div>
+                        <div class="form-row">
+                            <label for="password">비밀번호</label>
+                            <input type="password" id="password" name="password">
+                        </div>
+                    </div>
+                    <button type="submit">로그인</button>
+                    <div th:if="${param.error}">
+                        <div class="alert alert-danger" style="color: red;">
+                            사용자ID 또는 비밀번호를 확인해 주세요.
+                        </div>
+                    </div>
+                </form>
+                <p>계정이 없으신가요? <a href="/signup">회원가입</a></p>
+            </div>
+        </div>
+    </main>
+
+    <!-- 푸터 -->
+    <footer th:replace="~{common:: footer}"></footer>
+</body>
+
+</html>

@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>추천 결과</title>
+    <style>
+        .wrap{max-width:980px;margin:30px auto;font-family:system-ui,sans-serif}
+        .cards{display:flex;gap:20px;margin:20px 0}
+        .card{flex:1;border:1px solid #eee;border-radius:12px;padding:16px;text-align:center}
+        .kcal{margin-top:8px;color:#666}
+        .total{font-weight:600;margin-top:12px}
+    </style>
+</head>
+<body>
+<div class="wrap">
+    <h2 th:text="${r.get('date')} + ' 사용자를 위한 오늘의 식단'"></h2>
+    <p th:text="${r.get('comment')}" style="color:#555"></p>
+
+    <div class="cards">
+        <div class="card">
+            <h3>아침</h3>
+            <div th:text="${#maps.containsKey(r,'breakfast') ? ((r.get('breakfast') instanceof T(java.util.Map)) ? r.get('breakfast').get('menu') : '') : ''}"></div>
+            <div class="kcal" th:text="${#maps.containsKey(r,'breakfast') ? r.get('breakfast').get('kcal') : 0} + ' kcal'"></div>
+        </div>
+        <div class="card">
+            <h3>점심</h3>
+            <div th:text="${#maps.containsKey(r,'lunch') ? r.get('lunch').get('menu') : ''}"></div>
+            <div class="kcal" th:text="${#maps.containsKey(r,'lunch') ? r.get('lunch').get('kcal') : 0} + ' kcal'"></div>
+        </div>
+        <div class="card">
+            <h3>저녁</h3>
+            <div th:text="${#maps.containsKey(r,'dinner') ? r.get('dinner').get('menu') : ''}"></div>
+            <div class="kcal" th:text="${#maps.containsKey(r,'dinner') ? r.get('dinner').get('kcal') : 0} + ' kcal'"></div>
+        </div>
+    </div>
+
+    <div class="total">
+        합계: <span th:text="${r.get('total_kcal')}"></span> kcal
+        (목표: <span th:text="${r.get('goal_calories')}"></span> kcal)
+    </div>
+</div>
+</body>
+</html>

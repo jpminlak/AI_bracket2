@@ -65,7 +65,8 @@
     }
 
     .signup-box button:hover {
-        background: #333;
+        background: #807f7f;
+        color: black;
     }
 
     .signup-box p {
@@ -109,24 +110,6 @@
     .form-row input:last-child {
         margin-right: 0;
     }
-
-    /*button {
-        margin-top: 20px;
-        padding: 12px;
-        border: none;
-        background: #0b0b1a;
-        color: white;
-        font-size: 16px;
-        font-weight: bold;
-        border-radius: 6px;
-        cursor: pointer;
-        transition: 0.3s;
-        width: 100%;
-    }
-
-    button:hover {
-        background: #333;
-    }*/
 </style>
 
 <body>
@@ -138,6 +121,9 @@
         <div class="signup-container">
             <div class="signup-box">
                 <h2>로그인</h2>
+                <div th:if="${loginMessage}">
+                    <p style="color: green;" th:text="${loginMessage}"></p>
+                </div>
                 <form th:action="@{/member/login}" method="post">
                     <div>
                         <div class="form-row">
@@ -150,13 +136,11 @@
                         </div>
                     </div>
                     <button type="submit">로그인</button>
-                    <div th:if="${param.error}">
-                        <div class="alert alert-danger" style="color: red;">
-                            사용자ID 또는 비밀번호를 확인해 주세요.
-                        </div>
+                    <div th:if="${param.error != null}">
+                        <p style="color: red;">아이디 또는 비밀번호가 올바르지 않습니다.</p>
                     </div>
                 </form>
-                <p>계정이 없으신가요? <a href="/signup">회원가입</a></p>
+                <p>계정이 없으신가요? <a href="/member/signup">회원가입</a></p>
             </div>
         </div>
     </main>

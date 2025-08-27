@@ -22,7 +22,7 @@
             <a href="/record">기록</a>
         </nav>
         <div>
-            <button onclick="location.href='/member'">회원정보</button>
+            <button onclick="location.href='/member/mypage'">회원정보</button>
             <span>
                 <button sec:authorize="isAnonymous()" th:onclick="|location.href='@{/member/login}'|">로그인</button>
                 <form th:action="@{/member/logout}" method="post" sec:authorize="isAuthenticated()"
@@ -31,7 +31,7 @@
                     <button type="submit">로그아웃</button>
                 </form>
             </span>
-            <button onclick="location.href='/member/signup'">회원 가입</button>
+            <button onclick="location.href='/member/signup'">회원가입</button>
         </div>
     </header>
 

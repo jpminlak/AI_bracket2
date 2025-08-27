@@ -1,9 +1,10 @@
 package com.example.demo.member;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -33,16 +34,17 @@ public class MemberSecurityService implements UserDetailsService {
             authorities.add(new SimpleGrantedAuthority(MemberRole.USER.getValue()));
         }
         return new MemberContext(member, authorities);
-        //return new User(member.getMemberId(), member.getPassword(), authorities);
+    }
 
-
-        // User 객체의 첫 번째 인자는 Spring Security가 인증에 사용하는 'username'입니다.
-        // 두 번째 인자는 패스워드입니다.
-        // 여기서는 User 객체의 'username'에 DB의 'memberId'를 사용하고,
-        // 실제 사용자 이름은 별도로 관리하는 것이 일반적입니다.
-        // 하지만 간편하게 실제 사용자 이름을 직접 사용하도록 수정할 수 있습니다.
-
-        // 이 방식이 더 간단합니다.
-        //return new User(member.getUsername(), member.getPassword(), authorities);
+    // 회원정보 수정 후 SecurityContext 갱신
+    public void updateAuthentication(Member member) {
+        UserDetails userDetails = this.loadUserByUsername(member.getMemberId());
+        UsernamePasswordAuthenticationToken authentication =
+                new UsernamePasswordAuthenticationToken(
+                        userDetails,
+                        userDetails.getPassword(),
+                        userDetails.getAuthorities()
+                );
+        SecurityContextHolder.getContext().setAuthentication(authentication);
     }
 }

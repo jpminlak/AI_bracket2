@@ -1,0 +1,7 @@
+# Python cache & venv
+__pycache__/
+.venv/
+venv/
+
+# Model files (무시)
+Predict/kobert_emotion_model/

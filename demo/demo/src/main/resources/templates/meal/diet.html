@@ -11,12 +11,13 @@
         .row{display:flex;gap:12px}
         .row>div{flex:1}
         input,select{width:100%;padding:10px;border:1px solid #ddd;border-radius:8px}
+        label{display:block;margin-bottom:6px}
     </style>
 </head>
 <body>
 <div class="wrap">
     <h2 th:text="${today} + ' 사용자를 위한 오늘의 식단'"></h2>
-    <p style="color:#666">* 데모: DB 없이 예시 조건값으로 FastAPI(Ollama) 식단 추천 호출</p>
+    <p style="color:#666">* FastAPI의 /recommend를 호출합니다. <b>항상 라이브 모델</b>로 호출합니다.</p>
 
     <form method="post" th:action="@{/diet/recommend}">
         <div class="row">
@@ -27,19 +28,23 @@
                     <option th:selected="${gender=='male'}" value="male">남성</option>
                 </select>
             </div>
-            <div><label>나이</label><input name="age" type="number" th:value="${age}"/></div>
-            <div><label>키(cm)</label><input name="height" type="number" step="0.1" th:value="${height}"/></div>
-            <div><label>몸무게(kg)</label><input name="weight" type="number" step="0.1" th:value="${weight}"/></div>
+            <div>
+                <label>나이</label>
+                <input name="age" type="number" th:value="${age}"/>
+            </div>
+            <div>
+                <label>키(cm)</label>
+                <input name="height" type="number" step="0.1" th:value="${height}"/>
+            </div>
+            <div>
+                <label>몸무게(kg)</label>
+                <input name="weight" type="number" step="0.1" th:value="${weight}"/>
+            </div>
         </div>
-        <p style="margin-top:10px;color:#888">전날 식단은 “아침만 탄수 부족” 예시가 자동 적용됩니다.</p>
+
         <button class="btn" type="submit">추천 받기</button>
     </form>
 
-    <div class="cards">
-        <div class="card"><h3>아침</h3><div>0 kcal</div></div>
-        <div class="card"><h3>점심</h3><div>0 kcal</div></div>
-        <div class="card"><h3>저녁</h3><div>0 kcal</div></div>
-    </div>
 </div>
 </body>
 </html>

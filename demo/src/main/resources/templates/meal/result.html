@@ -52,7 +52,7 @@
     <header th:replace="~{common:: header}"></header>
     <main>
         <div class="wrap">
-            <h2 th:text="${#authentication.principal.member.username} + '님을 위한 오늘의 식단'"></h2>
+            <h2 th:text="${r.get('date')} + ' 사용자를 위한 오늘의 식단'"></h2>
             <p th:text="${r.get('comment')}" style="color:#555"></p>
 
             <div class="cards">

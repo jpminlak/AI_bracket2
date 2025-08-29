@@ -121,9 +121,12 @@
         <div class="signup-container">
             <div class="signup-box">
                 <h2>로그인</h2>
-                <div th:if="${loginMessage}">
-                    <p style="color: green;" th:text="${loginMessage}"></p>
+                <div th:if="${param.auth_error}">
+                    <p style="color:green;">로그인을 하셔야 회원정보를 볼 수 있습니다.</p>
                 </div>
+                <!-- <div th:if="${loginMessage}">
+                    <p style="color: green;" th:text="${loginMessage}"></p>
+                </div> -->
                 <form th:action="@{/member/login}" method="post">
                     <div>
                         <div class="form-row">
@@ -136,8 +139,11 @@
                         </div>
                     </div>
                     <button type="submit">로그인</button>
-                    <div th:if="${param.error != null}">
+                    <div th:if="${param.error != null and param.error[0] eq 'bad'}">
                         <p style="color: red;">아이디 또는 비밀번호가 올바르지 않습니다.</p>
+                    </div>
+                    <div th:if="${param.error != null and param.error[0] eq 'withdrawal'}">
+                        <p style="color: red;">탈퇴한 회원입니다. 새로운 계정으로 다시 가입해주세요.</p>
                     </div>
                 </form>
                 <p>계정이 없으신가요? <a href="/member/signup">회원가입</a></p>

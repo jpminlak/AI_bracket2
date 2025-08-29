@@ -2,13 +2,18 @@ package com.example.demo.member;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
+import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -25,6 +30,7 @@ public class MemberController {
 
     private final MemberService memberService;
     private final MemberSecurityService memberSecurityService;
+    private final AuthenticationManager authenticationManager;
 
     @GetMapping("/login")
     public String login(@RequestParam(value = "needLogin", required = false) String needLogin, Model model) {
@@ -36,11 +42,6 @@ public class MemberController {
 
     @GetMapping("/mypage")
     public String mypage(Principal principal, Model model, RedirectAttributes redirectAttributes) {
-        if (principal == null) {
-            // RedirectAttributes를 사용하여 메시지를 flash 속성으로 전달
-            redirectAttributes.addFlashAttribute("loginMessage", "로그인을 하셔야 회원정보를 볼 수 있습니다.");
-            return "redirect:/member/login";
-        }
         return "/member/mypage";
     }
 
@@ -50,18 +51,26 @@ public class MemberController {
     }
 
     @PostMapping("/signup")
-    public String signup(@Valid MemberCreateForm memberCreateForm, BindingResult bindingResult) {
+    public String signup(@Valid MemberCreateForm memberCreateForm, BindingResult bindingResult, HttpSession session) {
         if (bindingResult.hasErrors()) {
             return "/member/signup";
         }
         if (!memberCreateForm.getPassword1().equals(memberCreateForm.getPassword2())) {
-            bindingResult.rejectValue("password2", "passwordInCorrect",
-                    "2개의 패스워드가 일치하지 않습니다.");
+            bindingResult.rejectValue("password2", "passwordInCorrect", "2개의 패스워드가 일치하지 않습니다.");
             return "/member/signup";
         }
 
         try {
             memberService.create(memberCreateForm);
+
+            // 회원가입 성공 후 자동 로그인 처리
+            UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(memberCreateForm.getMemberId(), memberCreateForm.getPassword1());
+            Authentication authentication = authenticationManager.authenticate(authToken);
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+
+            // 세션에 인증 정보 저장
+            session.setAttribute(HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY, SecurityContextHolder.getContext());
+
             return "redirect:/";
         } catch(DataIntegrityViolationException e) {
             e.printStackTrace();

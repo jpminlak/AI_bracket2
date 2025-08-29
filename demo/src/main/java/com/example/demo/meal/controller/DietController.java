@@ -1,9 +1,5 @@
 package com.example.demo.meal.controller;
 
-import com.example.demo.member.Member;
-import com.example.demo.member.MemberRepository;
-import com.example.demo.member.MemberService;
-import org.apache.catalina.User;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Controller;
@@ -13,49 +9,41 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.client.RestTemplate;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 
 @Controller
 @RequestMapping("/diet")
 public class DietController {
-    MemberService memberService;
 
     @Value("${diet.api-base}")
     private String apiBase;     // 예: http://127.0.0.1:8001
-
 
     // 간단 버전: 컨트롤러 내부에서 RestTemplate 생성
     private final RestTemplate rest = new RestTemplate();
 
     /** 폼 페이지 */
     @GetMapping
-    public String form(Model model, RedirectAttributes re) {
+    public String form(Model model) {
         model.addAttribute("today", java.time.LocalDate.now().toString());
         model.addAttribute("gender", "female");
         model.addAttribute("age", 29);
         model.addAttribute("height", 165);
         model.addAttribute("weight", 62);
-
         return "meal/diet";
     }
 
     /** 추천 실행: 항상 라이브로 호출 + 전날식단(아침만) 예시 보정 포함 */
     @PostMapping("/recommend")
     public String recommend(
-
             @RequestParam String gender,
             @RequestParam Integer age,
             @RequestParam(name = "height") Double heightCm,
             @RequestParam(name = "weight") Double weightKg,
             Model model
     ) {
-
-
         // FastAPI 요청 바디(JSON) — 키 이름 중요
         Map<String, Object> body = new HashMap<>();
         body.put("gender", gender);

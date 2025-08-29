@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI 음식 사진 분석</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="header">
+    <div class="header-inner">
+        <div class="logo">
+            <a href="#">ooo님 환영합니다</a>
+        </div>
+        <nav class="nav">
+            <ul>
+                <li><a href="#" class="active">메인 메뉴</a></li>
+                <li><a href="#">사진 분석</a></li>
+                <li><a href="#">식단 관리</a></li>
+                <li><a href="#">영양소 분석</a></li>
+                <li><a href="#">추천 식단</a></li>
+                <li><a href="#">기록</a></li>
+            </ul>
+        </nav>
+        <div class="user-info">
+            <a href="#">최종 접속</a>
+            <a href="#">로그아웃</a>
+        </div>
+    </div>
+</header>
+
+<main class="main">
+    <section class="analysis-section">
+        <h1>AI 음식 사진 분석</h1>
+        <p>AI가 음식 종류와 영양 정보를 분석...</p>
+
+        <!-- 파일 업로드 박스 -->
+        <!-- 업로드 폼 -->
+        <form action="/api/food/upload" method="post" enctype="multipart/form-data">
+            <div class="upload-box">
+                <label for="file-upload" class="upload-label">
+                    📤 음식 사진 업로드
+                </label>
+                <!-- 반드시 name="file" 필요 -->
+                <input id="file-upload" name="file" type="file" accept="image/*" />
+
+                <p class="upload-subtext">JPG, PNG 파일을 선택하거나 여기로 드래그하여 업로드</p>
+                <p class="upload-tip">💡 팁: 음식이 선명하게 보이는 사진일수록 더 정확한 분석이 가능합니다</p>
+            </div>
+
+            <button type="submit">업로드 & 분석하기</button>
+        </form>
+
+    </section>
+</main>
+
+
+</div>
+<p class="copyright">Copyright © 2025 ooo All Rights Reserved.</p>
+</footer>
+
+</body>
+</html>
+
+<script>
+    document.getElementById("file-upload").addEventListener("change", async (event) => {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const formData = new FormData();
+      formData.append("file", file); // name="file" 과 동일해야 함
+
+      const response = await fetch("/api/food/upload", {
+        method: "POST",
+        body: formData
+      });
+
+      if (response.ok) {
+        alert("업로드 성공!");
+      } else {
+        alert("업로드 실패...");
+      }
+    });
+</script>
+<style>
+    body, h1, h2, h3, p, ul, li, a {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background-color: #f4f7f9;
+        color: #333;
+        line-height: 1.6;
+    }
+
+    a {
+        text-decoration: none;
+        color: inherit;
+    }
+
+    ul {
+        list-style: none;
+    }
+
+    /* 헤더 */
+    .header {
+        background-color: #fff;
+        border-bottom: 1px solid #e0e0e0;
+        padding: 1rem 2rem;
+    }
+
+    .header-inner {
+        max-width: 1200px;
+        margin: 0 auto;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .logo a {
+        font-weight: bold;
+        font-size: 1.2rem;
+        color: #555;
+    }
+
+    .nav ul {
+        display: flex;
+        gap: 1.5rem;
+    }
+
+    .nav a {
+        padding: 0.5rem 0.5rem;
+        font-size: 0.9rem;
+        color: #555;
+        transition: color 0.3s;
+    }
+
+    .nav a:hover,
+    .nav a.active {
+        color: #2c3e50;
+        border-bottom: 2px solid #3498db;
+    }
+
+    .user-info a {
+        font-size: 0.8rem;
+        color: #888;
+        margin-left: 1rem;
+    }
+
+    /* 메인 컨텐츠 */
+    .main {
+        padding: 2rem 2rem;
+        min-height: calc(100vh - 200px); /* 푸터 고려 */
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+    }
+
+    .analysis-section {
+        width: 100%;
+        max-width: 800px;
+        text-align: center;
+    }
+
+    .section-title {
+        font-size: 2rem;
+        font-weight: bold;
+        margin-bottom: 0.5rem;
+        color: #2c3e50;
+    }
+
+    .section-description {
+        color: #7f8c8d;
+        margin-bottom: 2rem;
+    }
+
+    .upload-box {
+        border: 2px dashed #bdc3c7;
+        background-color: #ecf0f1;
+        border-radius: 12px;
+        padding: 4rem 2rem;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        gap: 1rem;
+        color: #888;
+    }
+
+    .upload-icon {
+        display: flex;
+        gap: 1.5rem;
+    }
+
+    .upload-text {
+        font-size: 1.2rem;
+        font-weight: bold;
+    }
+
+    .upload-subtext {
+        font-size: 0.9rem;
+        color: #95a5a6;
+    }
+
+    .upload-tip {
+        font-size: 0.8rem;
+        color: #3498db;
+        background-color: #eaf6fc;
+        border-radius: 50px;
+        padding: 0.4rem 1rem;
+        margin-top: 1rem;
+        font-weight: bold;
+    }
+
+    /* 푸터 */
+    .footer {
+        background-color: #2c3e50;
+        color: #bdc3c7;
+        padding: 2rem 2rem 1rem;
+        font-size: 0.9rem;
+        border-top: 1px solid #34495e;
+    }
+
+    .footer-inner {
+        max-width: 1200px;
+        margin: 0 auto 2rem;
+        display: flex;
+        justify-content: space-between;
+        gap: 2rem;
+        flex-wrap: wrap;
+    }
+
+    .footer-col {
+        flex: 1;
+        min-width: 150px;
+    }
+
+    .footer-col p {
+        font-weight: bold;
+        color: #ecf0f1;
+        margin-bottom: 1rem;
+    }
+
+    .footer-col ul {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .contact p {
+        font-weight: normal;
+        margin-bottom: 0.5rem;
+    }
+
+    .copyright {
+        text-align: center;
+        color: #7f8c8d;
+        font-size: 0.8rem;
+        margin-top: 1rem;
+    }
+
+    /* 모바일 반응형 */
+    @media screen and (max-width: 768px) {
+        .header-inner {
+            flex-direction: column;
+            text-align: center;
+            gap: 1rem;
+        }
+
+        .nav ul {
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 1rem;
+        }
+
+        .user-info {
+            margin-top: 0.5rem;
+        }
+
+        .main {
+            padding: 1rem;
+        }
+
+        .upload-box {
+            padding: 2rem 1rem;
+        }
+
+        .footer-inner {
+            flex-direction: column;
+            text-align: center;
+            gap: 1rem;
+        }
+
+        .footer-col {
+            min-width: unset;
+        }
+    }
+</style>

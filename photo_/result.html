@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI 분석 결과</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <main class="main-container">
+        <section class="analysis-result-section">
+            <div class="header-status">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2ecc71" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-check-circle"><path d="M22 11.08V12a10 10 0 1 1-5.93-8.88"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+                <span>분석 완료!</span>
+            </div>
+            
+            <div class="food-info-box">
+                <h2 class="food-name">인식된 음식</h2>
+                <p class="food-name-value">불고기</p>
+                <p class="serving-info">추정 섭취량: 1인분 (약 150g)</p>
+                <div class="confidence-score">
+                    <div class="confidence-bar">
+                        <div class="confidence-fill" style="width: 95%;"></div>
+                    </div>
+                    <span>분석 신뢰도: 95%</span>
+                </div>
+            </div>
+
+            <div class="nutrient-boxes">
+                <div class="nutrient-box calorie">
+                    <span class="nutrient-icon">🔥</span>
+                    <p class="nutrient-title">칼로리</p>
+                    <p class="nutrient-value">350</p>
+                    <span class="nutrient-unit">kcal</span>
+                </div>
+                <div class="nutrient-box carb">
+                    <span class="nutrient-icon">🍚</span>
+                    <p class="nutrient-title">탄수화물</p>
+                    <p class="nutrient-value">10</p>
+                    <span class="nutrient-unit">g</span>
+                </div>
+                <div class="nutrient-box protein">
+                    <span class="nutrient-icon">🥩</span>
+                    <p class="nutrient-title">단백질</p>
+                    <p class="nutrient-value">28</p>
+                    <span class="nutrient-unit">g</span>
+                </div>
+                <div class="nutrient-box fat">
+                    <span class="nutrient-icon">🧀</span>
+                    <p class="nutrient-title">지방</p>
+                    <p class="nutrient-value">20</p>
+                    <span class="nutrient-unit">g</span>
+                </div>
+            </div>
+
+            <div class="analysis-details-box">
+                <h3 class="details-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#f1c40f" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-info"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+                    영양 분석 결과
+                </h3>
+                <ul class="details-list">
+                    <li>불고기는 균형 잡힌 한국 전통 음식입니다.</li>
+                    <li>하루 권장 칼로리(2000kcal)의 약 18%에 해당합니다.</li>
+                    <li>단백질 함량이 28g로 적정 수준입니다.</li>
+                    <li>건강한 식단 유지를 위해 야채와 함께 드시는 것을 추천합니다.</li>
+                </ul>
+            </div>
+            
+        </section>
+
+        <div class="button-group">
+            <button class="btn btn-primary">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-refresh-cw"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.5 15c-.17 0-.34-.02-.5-.06A9 9 0 1 1 20 10c0-1.85-.6-3.56-1.5-4.94"></path></svg>
+                <span>새로운 분석 시작</span>
+            </button>
+            <button class="btn btn-secondary">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-plus-circle"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="16"></line><line x1="8" y1="12" x2="16" y2="12"></line></svg>
+                <span>식단에 추가</span>
+            </button>
+        </div>
+    </main>
+
+</body>
+</html>
+<style>
+    body, h1, h2, h3, p, ul, li {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f4f7f9;
+    color: #333;
+    line-height: 1.6;
+}
+
+.main-container {
+    max-width: 800px;
+    margin: 2rem auto;
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.analysis-result-section {
+    background-color: #fff;
+    border-radius: 12px;
+    padding: 2rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.header-status {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    font-weight: bold;
+    color: #2ecc71;
+    margin-bottom: 2rem;
+}
+
+.header-status svg {
+    margin-right: 0.5rem;
+}
+
+.food-info-box {
+    text-align: center;
+    padding-bottom: 2rem;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.food-name {
+    font-size: 1rem;
+    color: #888;
+    margin-bottom: 0.5rem;
+}
+
+.food-name-value {
+    font-size: 2.5rem;
+    font-weight: bold;
+    color: #2c3e50;
+    margin-bottom: 0.5rem;
+}
+
+.serving-info {
+    font-size: 0.9rem;
+    color: #999;
+    margin-bottom: 1rem;
+}
+
+.confidence-score {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.confidence-bar {
+    width: 80%;
+    height: 8px;
+    background-color: #e0e0e0;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.confidence-fill {
+    height: 100%;
+    background-color: #3498db;
+    border-radius: 4px;
+}
+
+.confidence-score span {
+    font-size: 0.9rem;
+    color: #555;
+}
+
+.nutrient-boxes {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-top: 2rem;
+    flex-wrap: wrap;
+}
+
+.nutrient-box {
+    flex: 1;
+    min-width: 150px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 1.5rem 1rem;
+    border-radius: 12px;
+    border: 1px solid #e0e0e0;
+    background-color: #fcfcfc;
+}
+
+.nutrient-box.calorie { border-color: #ffb4b4; background-color: #fff6f6; }
+.nutrient-box.carb { border-color: #c9e2b1; background-color: #f7fcf2; }
+.nutrient-box.protein { border-color: #d1b4c3; background-color: #f9f5f7; }
+.nutrient-box.fat { border-color: #f9e3c0; background-color: #fcf9f2; }
+
+.nutrient-icon {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+}
+
+.nutrient-title {
+    font-size: 0.9rem;
+    color: #888;
+}
+
+.nutrient-value {
+    font-size: 2rem;
+    font-weight: bold;
+    line-height: 1.2;
+    margin-top: 0.2rem;
+}
+
+.nutrient-unit {
+    font-size: 0.8rem;
+    color: #888;
+    margin-top: -0.2rem;
+}
+
+.nutrient-box.calorie .nutrient-value { color: #e74c3c; }
+.nutrient-box.carb .nutrient-value { color: #27ae60; }
+.nutrient-box.protein .nutrient-value { color: #9b59b6; }
+.nutrient-box.fat .nutrient-value { color: #f1c40f; }
+
+.analysis-details-box {
+    background-color: #f8f8f8;
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-top: 2rem;
+}
+
+.details-title {
+    font-size: 1.1rem;
+    font-weight: bold;
+    color: #444;
+    display: flex;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.details-title svg {
+    margin-right: 0.5rem;
+}
+
+.details-list {
+    list-style-type: none;
+    padding-left: 0;
+}
+
+.details-list li {
+    font-size: 0.9rem;
+    color: #555;
+    margin-bottom: 0.5rem;
+    position: relative;
+    padding-left: 1rem;
+}
+
+.details-list li::before {
+    content: "•";
+    position: absolute;
+    left: 0;
+    color: #3498db;
+    font-weight: bold;
+}
+
+.button-group {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.btn {
+    padding: 0.8rem 1.5rem;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: background-color 0.3s;
+}
+
+.btn-primary {
+    background-color: #3498db;
+    color: #fff;
+}
+
+.btn-primary:hover {
+    background-color: #2980b9;
+}
+
+.btn-secondary {
+    background-color: #fff;
+    color: #3498db;
+    border: 1px solid #3498db;
+}
+
+.btn-secondary:hover {
+    background-color: #ecf0f1;
+}
+
+/* 모바일 반응형 */
+@media screen and (max-width: 600px) {
+    .main-container {
+        padding: 1rem;
+    }
+
+    .analysis-result-section {
+        padding: 1.5rem;
+    }
+
+    .food-name-value {
+        font-size: 2rem;
+    }
+
+    .nutrient-boxes {
+        flex-direction: column;
+    }
+
+    .nutrient-box {
+        min-width: auto;
+    }
+
+    .button-group {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .btn {
+        width: 100%;
+        justify-content: center;
+    }
+}
+</style>

@@ -1,8 +1,7 @@
-package com.example.demo.Food.controller;
+package com.example.demo.food.controller;
 
-
-import com.example.demo.Food.Service.FoodService;
-import com.example.demo.Food.model.dto.FoodResponseDto;
+import com.example.demo.food.model.dto.FoodResponseDto;
+import com.example.demo.food.Service.FoodService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;

@@ -1,11 +1,8 @@
-package com.example.demo.Food.Service;
+package com.example.demo.food.Service;
 
-import com.example.demo.Food.model.dto.FoodResponseDto;
+import com.example.demo.food.model.dto.FoodResponseDto;
 import org.springframework.core.io.FileSystemResource;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;

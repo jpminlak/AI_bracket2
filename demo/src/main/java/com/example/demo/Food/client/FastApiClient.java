@@ -1,4 +1,4 @@
-package com.example.demo.Food.client;//package Food.client;
+//package Food.client;
 //
 //import Food.Service.MultipartInputStreamFileResource;
 //import org.springframework.http.HttpEntity;

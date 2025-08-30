@@ -1,13 +1,7 @@
-package com.example.demo.Food.model;
-
+package com.example.demo.food.model;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
-
+import lombok.*;
 
 @Entity
 @Table(name = "food")
@@ -36,5 +30,4 @@ public class Food {
 
     //업로드하면 저장되는 경로
     private String imagePath;
-
 }

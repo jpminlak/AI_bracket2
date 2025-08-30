@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>음식 분석 & 추천 - 공지사항</title>
+    <link rel="stylesheet" th:href="@{/main.css}">
+    <style>
+        .notice-container {
+            display: flex;
+            justify-content: center;
+            padding: 40px 0;
+        }
+
+        .notice-box {
+            background: #fff;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            width: 70%;
+        }
+
+        .notice-box h2 {
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 1.8em;
+            color: #222;
+        }
+
+        .notice-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        .notice-table th,
+        .notice-table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #ddd;
+            text-align: left;
+        }
+
+        .notice-table th {
+            background-color: #f9f9f9;
+            color: #555;
+            font-weight: bold;
+        }
+
+        .notice-table a {
+            color: #0b0b1a;
+            text-decoration: none;
+        }
+
+        .notice-table a:hover {
+            text-decoration: underline;
+        }
+
+        .notice-table tr:hover {
+            background-color: #f1f1f1;
+        }
+
+        .notice-table .title {
+            width: 70%;
+        }
+
+        .notice-table .date {
+            width: 30%;
+            text-align: right;
+            color: #888;
+            font-size: 0.9em;
+        }
+
+        .btn-primary {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 16px;
+            font-weight: bold;
+            color: #fff;
+            background-color: black;
+            border: none;
+            border-radius: 6px;
+            text-decoration: none;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .btn-primary:hover {
+            background: #acabab;
+            color: black;
+        }
+    </style>
+</head>
+
+<body>
+    <header th:replace="~{common:: header}"></header>
+
+    <main>
+        <div class="notice-container">
+            <div class="notice-box">
+                <h2>공지사항</h2>
+                <table class="notice-table">
+                    <thead>
+                        <tr>
+                            <th class="title">제목</th>
+                            <th class="date">작성일</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="notice : ${noticeList}">
+                            <td class="title"><a th:href="@{/notice/{id}(id=${notice.noticeId})}"
+                                    th:text="${notice.noticeTitle}"></a></td>
+                            <td class="date" th:text="${#temporals.format(notice.regDate, 'yyyy-MM-dd HH:mm')}"></td>
+                        </tr>
+                        <tr th:if="${#lists.isEmpty(noticeList)}">
+                            <td colspan="2" style="text-align: center;">공지사항이 없습니다.</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div sec:authorize="hasRole('ROLE_ADMIN')" style="text-align: right; margin-bottom: 10px;">
+                    <a th:href="@{/notice_write}" class="btn-primary">글쓰기</a>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer th:replace="~{common:: footer}"></footer>
+</body>
+
+</html>

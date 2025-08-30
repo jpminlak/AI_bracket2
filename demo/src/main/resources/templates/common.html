@@ -28,8 +28,6 @@
                     <button type="submit">로그아웃</button>
                 </form>
             </span>
-            <!-- <button onclick="location.href='/member/signup'">회원가입</button> -->
-            <!-- <button th:onclick="signupCheck()">회원가입</button> -->
             <!-- 로그인 상태일 때는 경고창 버튼, 로그아웃 상태일 때는 회원가입 페이지로 이동하는 버튼을 표시 -->
             <button sec:authorize="isAuthenticated()" onclick="alert('먼저 로그아웃해 주세요.');">회원가입</button>
             <button sec:authorize="isAnonymous()" onclick="location.href='/member/signup'">회원가입</button>
@@ -41,15 +39,14 @@
         <div>
             <h4>고객지원</h4>
             <a href="/terms">이용약관</a>
-            <a href="/personalinfo">개인정보처리방침</a>
             <a href="/inquiry">문의하기</a>
             <a href="/notice">공지사항</a>
         </div>
         <div>
             <h4>연락처</h4>
             <p>주소: 경기도 수원시 팔달구 중부대로 104</p>
-            <p>전화: 02-123-4567</p>
-            <p>이메일: contact@ooo.com</p>
+            <p>전화: 031-234-5678</p>
+            <p>이메일: contact@mealstaffcom</p>
         </div>
         <div class="footer-bottom">
             © 2025 MealStaff. All rights reserved.

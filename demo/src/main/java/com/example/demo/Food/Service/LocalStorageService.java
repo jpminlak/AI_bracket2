@@ -1,4 +1,4 @@
-package com.example.demo.Food.Service;
+package com.example.demo.food.Service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

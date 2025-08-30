@@ -1,7 +1,6 @@
-package com.example.demo.Food.Service;
+package com.example.demo.food.Service;
 
 import org.springframework.core.io.InputStreamResource;
-
 import java.io.IOException;
 import java.io.InputStream;
 

@@ -52,7 +52,6 @@ dependencies {
     // doyun
     //implementation 'org.springframework.boot:spring-boot-starter-webflux' // ★ 추가
     //implementation 'org.springframework:spring-webflux' // WebClient
-    //implementation 'org.springframework.boot:spring-boot-starter-webflux'   // ⬅️ 이 줄 필수
     //implementation 'com.fasterxml.jackson.core:jackson-databind'
 
 }

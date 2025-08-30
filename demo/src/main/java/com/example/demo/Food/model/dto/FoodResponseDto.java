@@ -1,5 +1,4 @@
-package com.example.demo.Food.model.dto;
-
+package com.example.demo.food.model.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

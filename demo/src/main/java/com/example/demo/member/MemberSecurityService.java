@@ -1,6 +1,7 @@
 package com.example.demo.member;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -28,11 +29,9 @@ public class MemberSecurityService implements UserDetailsService {
         }
         Member member = _member.get();
 
-        // ✅ 탈퇴 회원이면 로그인 불가 처리
+        // 탈퇴 회원이면 로그인 불가 처리
         if (member.getStatus() == MemberStatus.WITHDRAWAL) {
-            throw new UsernameNotFoundException("탈퇴한 회원입니다.");
-            // 또는 DisabledException 사용 가능
-            // throw new DisabledException("탈퇴한 회원입니다.");
+            throw new DisabledException("탈퇴한 회원입니다.");
         }
 
         List<GrantedAuthority> authorities = new ArrayList<>();

@@ -1,0 +1,21 @@
+# 실행해야할 Python 파일들
+# /MealMind/app.py
+# http://127.0.0.1:8001/ping    // 동작 확인. 그냥 접속하면 http://127.0.0.1:8001/ 로 가서 작동을 하지 않을 수 있다. 반드시 /ping을 덧붙이자.
+
+# 터미널에서 입력: pip install -r requirements.txt
+fastapi
+uvicorn[standard]
+python-dotenv
+pydantic
+requests
+tensorflow
+numpy
+pandas
+joblib
+python-multipart
+ultralytics
+transformers
+httpx
+
+# 그밖에 설치할 파일
+# ollama pull qwen2.5:3b-instruct

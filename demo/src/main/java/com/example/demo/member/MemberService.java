@@ -9,7 +9,6 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Optional;
 
 @RequiredArgsConstructor
@@ -18,18 +17,6 @@ public class MemberService {
 
     private final MemberRepository memberRepository;
     private final PasswordEncoder passwordEncoder;
-
-
-    public Optional<Member> findByMemberId(String memberId){
-        Optional<Member> list=memberRepository.findByMemberId(memberId);
-        return list;
-    }
-
-    public Optional<Member> findByUsername(String username){
-        Optional<Member> list=memberRepository.findByUsername(username);
-        return list;
-    }
-
 
     public Member create(MemberCreateForm memberCreateForm) {
         Member member = new Member();

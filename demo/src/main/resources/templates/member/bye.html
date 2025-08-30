@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>음식 분석 & 추천 - 회원 탈퇴 완료</title>
+    <link rel="stylesheet" th:href="@{/main.css}">
+    <style>
+        .bye-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            text-align: center;
+            background-color: #f4f4f9;
+        }
+
+        .bye-box {
+            background: #fff;
+            padding: 50px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            max-width: 500px;
+            width: 100%;
+        }
+
+        .bye-box h2 {
+            font-size: 2.5em;
+            color: #d9534f;
+            margin-bottom: 20px;
+        }
+
+        .bye-box p {
+            font-size: 1.2em;
+            color: #555;
+            line-height: 1.5;
+            margin-bottom: 30px;
+        }
+
+        .bye-box a {
+            display: inline-block;
+            padding: 12px 25px;
+            background: #0b0b1a;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: bold;
+            transition: background 0.3s, color 0.3s;
+        }
+
+        .bye-box a:hover {
+            background: #acabab;
+            color: black;
+        }
+    </style>
+</head>
+
+<body>
+    <header th:replace="~{common:: header}"></header>
+    <main>
+        <div class="bye-container">
+            <div class="bye-box">
+                <h2>회원 탈퇴가 완료되었습니다</h2>
+                <p>저희 서비스를 이용해주셔서 감사합니다.<br>더 나은 모습으로 다시 찾아뵙겠습니다.</p>
+                <a th:href="@{/member/login}">로그인 페이지로 이동</a>
+            </div>
+        </div>
+    </main>
+    <footer th:replace="~{common:: footer}"></footer>
+</body>
+
+</html>

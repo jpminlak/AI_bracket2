@@ -30,6 +30,9 @@ public class MemberService {
         return list;
     }
 
+    public Optional<Member> findById(Long id) {
+        return memberRepository.findById(id);
+    }
 
     public Member create(MemberCreateForm memberCreateForm) {
         Member member = new Member();

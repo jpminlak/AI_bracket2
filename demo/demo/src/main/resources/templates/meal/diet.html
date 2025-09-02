@@ -72,22 +72,19 @@
 
                     <div>
                         <label>성별</label>
-                        <select name="gender">
-                            <option th:selected="${gender=='female'}" value="female">여성</option>
-                            <option th:selected="${gender=='male'}" value="male">남성</option>
+                        <select name="sex">
+                            <option th:selected="${#authentication.principal.member.sex == '여'}" value="여">여성</option>
+                            <option th:selected="${#authentication.principal.member.sex == '남'}" value="남">남성</option>
                         </select>
-                    </div>
-                    <div>
-                        <label>나이</label>
-                        <input name="age" type="number" th:value="${age}" />
+
                     </div>
                     <div>
                         <label>키(cm)</label>
-                        <input name="height" type="number" step="0.1" th:value="${height}" />
+                        <input name="height" type="number" step="0.1" th:value="${#authentication.principal.member.height}" />
                     </div>
                     <div>
                         <label>몸무게(kg)</label>
-                        <input name="weight" type="number" step="0.1" th:value="${weight}" />
+                        <input name="weight" type="number" step="0.1" th:value="${#authentication.principal.member.weight}" />
                     </div>
                 </div>
 

@@ -1,287 +1,265 @@
 # app.py
-# --------------------------------------------
-# MealMind: FastAPI + Ollama(JSON 안정화 버전)
-# --------------------------------------------
-from __future__ import annotations # 파이썬의 미래 문법(타입힌트 전방참조)을 켜서 타입 표기가 더 유연해지게 함.
-import os, re, json, math, requests # 표준 라이브러리(환경변수, 정규식, JSON, 수학)와 HTTP 요청용 requests 임포트.
-from typing import Any, Dict, Optional # 타입힌트용 임포트.
+# ------------------------------------------------------------
+# FastAPI: Diet recommendation service (gender/height/weight only)
+# - GET  /ping
+# - POST /recommend?live=true|false
+# Response (backward-compatible for Java):
+# {
+#   "breakfast": {"menu":"...", "kcal":0, "nutrients":{"protein_g":0,"carbs_g":0,"fat_g":0,"fiber_g":0}},
+#   "lunch":     {"menu":"...", "kcal":0, "nutrients":{...}},
+#   "dinner":    {"menu":"...", "kcal":0, "nutrients":{...}},
+#   "total_kcal": 0,
+#   "goal_kcal":  0,
+#   "total_nutrients": {"protein_g":0,"carbs_g":0,"fat_g":0,"fiber_g":0},
+#   "reason": "한 줄 설명"   # NEW
+# }
+# ------------------------------------------------------------
+import os
+import json
+import re
+from typing import Optional, Dict, Any, List
 
-from fastapi import FastAPI, Body, Query # FastAPI와 관련된 클래스 및 함수 임포트.
-from pydantic import BaseModel, Field # 데이터 검증 및 설정 관리를 위한 Pydantic 임포트.
-import uvicorn # ASGI 서버인 Uvicorn 임포트.
+import uvicorn
+import httpx
+from fastapi import FastAPI, Query
+from pydantic import BaseModel, Field
 
-# ===== 환경설정 =====
+app = FastAPI(title="Diet Recommender", version="1.4.0")
+
+# ---------- Env (LLM) ----------
 OLLAMA_HOST = os.getenv("OLLAMA_HOST", "http://127.0.0.1:11434")
 OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "qwen2.5:3b-instruct")
-APP_PORT = int(os.getenv("PORT", "8001"))
+TIMEOUT_SEC = float(os.getenv("HTTP_TIMEOUT", "30"))
 
-# ===== FastAPI =====
-app = FastAPI(title="MealMind API", version="1.1.0")
+# =========================
+# 1) Request
+# =========================
+class _PydanticV2ExtraIgnore(BaseModel):
+    class Config:
+        extra = "ignore"
 
-# ===== Pydantic 모델 =====
-class RecommendRequest(BaseModel):
-    gender: str = Field(..., description="male/female (자유 문자열 허용)")
-    age: int = Field(..., ge=1, le=120)
+class RecommendRequest(_PydanticV2ExtraIgnore):
+    gender: str = Field(..., description="male/female or '여/남'")
     height_cm: float = Field(..., gt=0)
     weight_kg: float = Field(..., gt=0)
-    activity_level: Optional[str] = Field(
-        default="light",
-        description="sedentary/light/moderate/active/very_active (옵션)"
-    )
 
-class Nutrients(BaseModel):
-    carbs_g: int
-    protein_g: int
-    fat_g: int
-    fiber_g: int
-    sodium_mg: int
+# =========================
+# 2) Calorie & Nutrients
+# =========================
+def _normalize_gender(g: str) -> str:
+    if not g:
+        return "female"
+    s = g.strip().lower()
+    if s in ("남", "m", "male", "man", "boy"):
+        return "male"
+    if s in ("여", "f", "female", "woman", "girl"):
+        return "female"
+    return "female"
 
-class Meal(BaseModel):
-    menu: str
-    kcal: int
-    nutrients: Nutrients
-
-class RecommendResponse(BaseModel):
-    breakfast: Meal
-    lunch: Meal
-    dinner: Meal
-    total_kcal: int
-    goal_calories: int
-    comment: str
-
-# ===== 유틸: JSON 느슨 파서 =====
-def _parse_json_loose(s: str) -> Dict[str, Any]:
-    """
-    - 코드펜스/앞뒤 잡소리 제거
-    - 가장 바깥 {...}만 추출
-    - 최종 json.loads()
-    """
-    t = (s or "").strip()
-    # 코드펜스 제거
-    if t.startswith("```"):
-        t = re.sub(r"^```(?:json)?\s*|\s*```$", "", t, flags=re.IGNORECASE | re.DOTALL).strip()
-    # 가장 바깥 {} 추출
-    i, j = t.find("{"), t.rfind("}")
-    if i != -1 and j != -1 and i < j:
-        t = t[i:j + 1]
-    return json.loads(t)
-
-# ===== 유틸: 목표 칼로리(대략) =====
-def _bmr_mifflin(gender: str, age: int, height_cm: float, weight_kg: float) -> float:
-    if gender.lower().startswith("m"):  # male
+def _bmr_mifflin(gender: str, height_cm: float, weight_kg: float, age: int = 21) -> float:
+    g = _normalize_gender(gender)
+    if g == "male":
         return 10 * weight_kg + 6.25 * height_cm - 5 * age + 5
-    return 10 * weight_kg + 6.25 * height_cm - 5 * age - 161  # female
+    return 10 * weight_kg + 6.25 * height_cm - 5 * age - 161
 
-def _activity_factor(level: str) -> float:
-    level = (level or "").lower()
-    return {
-        "sedentary": 1.2,
-        "light": 1.375,
-        "moderate": 1.55,
-        "active": 1.725,
-        "very_active": 1.9,
-    }.get(level, 1.375)
+def _activity_factor() -> float:
+    return 1.375  # light
 
 def calc_goal_calories(req: RecommendRequest) -> int:
-    bmr = _bmr_mifflin(req.gender, req.age, req.height_cm, req.weight_kg)
-    tdee = bmr * _activity_factor(req.activity_level)
-    # 딱 떨어지게 반올림
+    bmr = _bmr_mifflin(req.gender, req.height_cm, req.weight_kg, age=21)
+    tdee = bmr * _activity_factor()
     return int(round(tdee / 10.0) * 10)
 
-# ===== 프롬프트 =====
-def build_prompt_open(req: RecommendRequest, goal: int) -> str:
-    return f"""
-역할: 당신은 한국인 일반식을 기준으로 1일 3끼 식단을 설계하는 영양 코치입니다.
-조건:
-- 사용자의 성별/나이/키/몸무게/활동수준에 맞춰 3끼 식단을 추천하세요.
-- 각 끼니는 '메뉴 문자열', '칼로리', '영양소(탄수화물g/단백질g/지방g/식이섬유g/나트륨mg)'만 제공합니다.
-- 출력은 오직 JSON 오브젝트 하나만 반환하세요. 코드펜스나 주석/설명 금지.
-입력:
-- gender: {req.gender}
-- age: {req.age}
-- height_cm: {req.height_cm}
-- weight_kg: {req.weight_kg}
-- activity_level: {req.activity_level}
-- goal_calories: {goal}
+def _split_calories(total: int) -> Dict[str, int]:
+    b = int(round(total * 0.30))
+    l = int(round(total * 0.40))
+    d = total - b - l
+    return {"breakfast": b, "lunch": l, "dinner": d}
 
-반환 스키마 예시(JSON):
+def _compute_fiber_g(kcal: int) -> int:
+    return max(2, int(round(kcal / 1000.0 * 14)))
+
+def _compute_nutrients(kcal: int, protein_ratio=0.25, carbs_ratio=0.50, fat_ratio=0.25) -> Dict[str, int]:
+    protein_g = int(round(kcal * protein_ratio / 4.0))
+    carbs_g   = int(round(kcal * carbs_ratio   / 4.0))
+    fat_g     = int(round(kcal * fat_ratio     / 9.0))
+    fiber_g   = _compute_fiber_g(kcal)
+    return {"protein_g": protein_g, "carbs_g": carbs_g, "fat_g": fat_g, "fiber_g": fiber_g}
+
+def _sum_nutrients(a: Dict[str, int], b: Dict[str, int]) -> Dict[str, int]:
+    return {
+        "protein_g": a.get("protein_g", 0) + b.get("protein_g", 0),
+        "carbs_g":   a.get("carbs_g",   0) + b.get("carbs_g",   0),
+        "fat_g":     a.get("fat_g",     0) + b.get("fat_g",     0),
+        "fiber_g":   a.get("fiber_g",   0) + b.get("fiber_g",   0),
+    }
+
+# =========================
+# 3) Menu normalization (1~4 items, Korean-friendly, coherent set)
+# =========================
+_DEFAULT_MEALS = {
+    "breakfast": ["현미밥", "달걀국", "두부조림", "김치"],
+    "lunch":     ["현미밥", "닭가슴살 불고기", "시금치나물", "김치"],
+    "dinner":    ["잡곡밥", "연어구이", "구운채소", "미역국"],
+}
+_SPLIT_PATTERN = re.compile(r"[,\u00B7\u2022|/·・]+")
+
+def _normalize_menu_value(val: Any, meal_key: str, max_items: int = 4) -> str:
+    items: List[str]
+    if isinstance(val, list):
+        items = [str(x).strip() for x in val if str(x).strip()]
+    else:
+        s = str(val or "").strip()
+        items = [t.strip() for t in _SPLIT_PATTERN.split(s) if t.strip()] if s else []
+    if not items:
+        items = _DEFAULT_MEALS.get(meal_key, [])[:max_items]
+    items = items[:max_items]
+    if not items:
+        items = _DEFAULT_MEALS.get(meal_key, ["현미밥"])[:1]
+    return ", ".join(items)
+
+# =========================
+# 4) LLM
+# =========================
+def build_prompt_open(req: RecommendRequest, goal: int) -> str:
+    gender = _normalize_gender(req.gender)
+    return f"""
+You are a Korean diet planner. Generate a Korean-friendly daily meal plan as JSON.
+
+Rules:
+- Inputs: gender={gender}, height_cm={req.height_cm}, weight_kg={req.weight_kg}
+- Total daily calories target: {goal} kcal
+- Split: breakfast 30%, lunch 40%, dinner 30%
+- Each meal is a coherent Korean set (don't mix toast with rice/국).
+- 다양한 메뉴 추천 (항상 한식일 필요 없음) (예: 샐러드, 파스타, 스테이크, 볶음밥, 덮밥 등)
+- Each "menu" has 1~4 items, comma-separated.
+- Output STRICT JSON (no markdown):
 {{
-  "breakfast": {{
-    "menu": "현미밥 120g + 계란 2개 + 야채샐러드 100g",
-    "kcal": 460,
-    "nutrients": {{"carbs_g": 64, "protein_g": 20, "fat_g": 13, "fiber_g": 6, "sodium_mg": 230}}
-  }},
-  "lunch": {{
-    "menu": "잡곡밥 120g + 닭가슴살 120g + 구운 야채 120g",
-    "kcal": 520,
-    "nutrients": {{"carbs_g": 62, "protein_g": 44, "fat_g": 7, "fiber_g": 6, "sodium_mg": 170}}
-  }},
-  "dinner": {{
-    "menu": "연어구이 120g + 고구마 150g + 된장찌개 1컵",
-    "kcal": 465,
-    "nutrients": {{"carbs_g": 38, "protein_g": 34, "fat_g": 17, "fiber_g": 5, "sodium_mg": 920}}
-  }},
-  "total_kcal": 1445,
-  "goal_calories": {goal},
-  "comment": "하루 목표 대비 균형적으로 구성했습니다."
+  "breakfast": {{"menu":"현미밥, 달걀국, 두부조림, 김치","kcal":500,"nutrients":{{"protein_g":0,"carbs_g":0,"fat_g":0,"fiber_g":0}}}},
+  "lunch":     {{"menu":"현미밥, 닭가슴살 불고기, 시금치나물, 김치","kcal":700,"nutrients":{{"protein_g":0,"carbs_g":0,"fat_g":0,"fiber_g":0}}}},
+  "dinner":    {{"menu":"잡곡밥, 연어구이, 구운채소, 미역국","kcal":600,"nutrients":{{"protein_g":0,"carbs_g":0,"fat_g":0,"fiber_g":0}}}},
+  "total_kcal": 1800
 }}
-주의: 위는 포맷 예시일 뿐이며, 실제 추천은 사용자 조건에 맞춘 값으로 생성하세요.
 """.strip()
 
-# ===== Ollama 호출 =====
-def call_ollama_json(prompt: str, options: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
-    """
-    - Ollama /api/generate 호출
-    - 가능하면 format=json 유도
-    - 실패/비JSON 응답 시 느슨 파서로 재시도
-    """
+async def llm_complete_open(prompt: str) -> Optional[Dict[str, Any]]:
     url = f"{OLLAMA_HOST}/api/generate"
-    payload = {
-        "model": OLLAMA_MODEL,
-        "prompt": prompt,
-        "stream": False,
-        # 일부 모델은 format="json"을 지원: 유효하면 깔끔한 JSON, 아니면 무시되고 일반 텍스트
-        "format": "json",
-        "options": {
-            "temperature": 0.2,
-            "top_p": 0.9,
-            "top_k": 50,
-            "repeat_penalty": 1.15,
-            "num_predict": 320,
-            "stop": ["```"]
-        }
-    }
-    if options:
-        payload["options"].update(options)
-
-    r = requests.post(url, json=payload, timeout=120)
-    r.raise_for_status()
-    data = r.json()
-    resp = data.get("response", "")
-
-    # 1) 이미 dict인 경우
-    if isinstance(resp, dict):
-        return resp
-    # 2) 문자열이면 느슨 파싱
+    body = {"model": OLLAMA_MODEL, "prompt": prompt, "stream": False}
     try:
-        return _parse_json_loose(resp)
-    except Exception as e:
-        # 최후의 시도: 그냥 json.loads (혹시 완전한 JSON 문자열일 수 있으니)
-        return json.loads(resp)
-
-# ===== 정규화 =====
-def _coerce_int(x, default=0) -> int:
-    try:
-        return int(round(float(x)))
+        async with httpx.AsyncClient(timeout=TIMEOUT_SEC) as client:
+            resp = await client.post(url, json=body)
+            resp.raise_for_status()
+            data = resp.json()
+            text = data.get("response", "") or data.get("text", "")
+            try:
+                return json.loads(text)
+            except json.JSONDecodeError:
+                m = re.search(r"\{.*\}", text, re.DOTALL)
+                if m:
+                    return json.loads(m.group(0))
     except Exception:
-        return default
+        pass
+    return None
 
-def normalize_response(obj: Dict[str, Any], goal: int) -> RecommendResponse:
-    def _meal(key: str) -> Meal:
-        m = obj.get(key, {}) or {}
-        menu = str(m.get("menu", "메뉴 정보 없음")).strip()
-        kcal = _coerce_int(m.get("kcal"), 0)
-
-        n = m.get("nutrients", {}) or {}
-        nutrients = Nutrients(
-            carbs_g=_coerce_int(n.get("carbs_g"), 0),
-            protein_g=_coerce_int(n.get("protein_g"), 0),
-            fat_g=_coerce_int(n.get("fat_g"), 0),
-            fiber_g=_coerce_int(n.get("fiber_g"), 0),
-            sodium_mg=_coerce_int(n.get("sodium_mg"), 0),
-        )
-        return Meal(menu=menu, kcal=kcal, nutrients=nutrients)
-
-    breakfast = _meal("breakfast")
-    lunch = _meal("lunch")
-    dinner = _meal("dinner")
-
-    total_kcal = _coerce_int(obj.get("total_kcal"), breakfast.kcal + lunch.kcal + dinner.kcal)
-    goal_calories = _coerce_int(obj.get("goal_calories"), goal)
-    comment = str(obj.get("comment") or "모델 응답").strip()
-
-    return RecommendResponse(
-        breakfast=breakfast, lunch=lunch, dinner=dinner,
-        total_kcal=total_kcal, goal_calories=goal_calories, comment=comment
+# =========================
+# 5) Reason builder
+# =========================
+def _build_reason(goal_kcal: int, total_nutrients: Dict[str, int]) -> str:
+    # 한 줄: 목표칼로리 적합 + 비율 + 한식 조합 + 섬유 보너스
+    fiber = total_nutrients.get("fiber_g", 0)
+    return (
+        f"키·몸무게·성별로 계산한 목표 {goal_kcal} kcal에 맞춰 "
+        f"탄수 50%·단백질 25%·지방 25% 비율로 구성했고, "
+        f"밥·국·단백질·채소가 어우러지는 한식 조합으로 맛과 포만감을 균형 있게 설계했어요"
+        + (f" (식이섬유≈{fiber} g)." if fiber else ".")
     )
 
-# ===== 폴백 =====
-def fallback_response(goal: int) -> RecommendResponse:
-    # 스크린샷과 동일한 폴백 메뉴
-    return RecommendResponse(
-        breakfast=Meal(
-            menu="현미밥 120g + 계란 2개 + 야채샐러드 100g",
-            kcal=460,
-            nutrients=Nutrients(carbs_g=64, protein_g=20, fat_g=13, fiber_g=6, sodium_mg=230),
-        ),
-        lunch=Meal(
-            menu="잡곡밥 120g + 닭가슴살 120g + 구운 야채 120g",
-            kcal=520,
-            nutrients=Nutrients(carbs_g=62, protein_g=44, fat_g=7, fiber_g=6, sodium_mg=170),
-        ),
-        dinner=Meal(
-            menu="연어구이 120g + 고구마 150g + 된장찌개 1컵",
-            kcal=465,
-            nutrients=Nutrients(carbs_g=38, protein_g=34, fat_g=17, fiber_g=5, sodium_mg=920),
-        ),
-        total_kcal=1445,
-        goal_calories=goal,
-        comment="MODEL FALLBACK: JSONDecodeError",
-    )
+# =========================
+# 6) Fallback & Post-processing
+# =========================
+def _fallback_menu(goal_kcal: int) -> Dict[str, Any]:
+    cal = _split_calories(goal_kcal)
+    b_k, l_k, d_k = cal["breakfast"], cal["lunch"], cal["dinner"]
+    b = {"menu": ", ".join(_DEFAULT_MEALS["breakfast"][:4]), "kcal": b_k, "nutrients": _compute_nutrients(b_k)}
+    l = {"menu": ", ".join(_DEFAULT_MEALS["lunch"][:4]),     "kcal": l_k, "nutrients": _compute_nutrients(l_k)}
+    d = {"menu": ", ".join(_DEFAULT_MEALS["dinner"][:4]),    "kcal": d_k, "nutrients": _compute_nutrients(d_k)}
+    total_nut = _sum_nutrients(_sum_nutrients(b["nutrients"], l["nutrients"]), d["nutrients"])
+    reason = _build_reason(goal_kcal, total_nut)
+    return {
+        "breakfast": b, "lunch": l, "dinner": d,
+        "total_kcal": goal_kcal, "goal_kcal": goal_kcal,
+        "total_nutrients": total_nut,
+        "reason": reason,
+    }
 
-# ===== 서비스 로직 =====
-def open_mode_recommend(req: RecommendRequest) -> RecommendResponse:
-    goal = calc_goal_calories(req)
-    prompt = build_prompt_open(req, goal)
+def _rescale_meals_to_goal(b: Dict[str, Any], l: Dict[str, Any], d: Dict[str, Any], goal_kcal: int):
+    cur = int(b["kcal"]) + int(l["kcal"]) + int(d["kcal"])
+    if cur <= 0:
+        split = _split_calories(goal_kcal)
+        b["kcal"], l["kcal"], d["kcal"] = split["breakfast"], split["lunch"], split["dinner"]
+    else:
+        if abs(cur - goal_kcal) > 200:
+            factor = goal_kcal / float(cur)
+            bk = int(round(b["kcal"] * factor))
+            lk = int(round(l["kcal"] * factor))
+            dk = goal_kcal - bk - lk
+            b["kcal"], l["kcal"], d["kcal"] = bk, lk, dk
+    # kcal 기반 영양소 재계산
+    b["nutrients"] = _compute_nutrients(int(b["kcal"]))
+    l["nutrients"] = _compute_nutrients(int(l["kcal"]))
+    d["nutrients"] = _compute_nutrients(int(d["kcal"]))
 
-    # 모델 호출 + 정규화
-    raw = call_ollama_json(prompt)
-    return normalize_response(raw, goal)
+def _ensure_shape_and_fit(js: Dict[str, Any], goal_kcal: int) -> Dict[str, Any]:
+    def norm_menu(val: Any, key: str) -> str:
+        return _normalize_menu_value(val, key)
 
-# ===== 엔드포인트 =====
+    def norm_meal(key: str) -> Dict[str, Any]:
+        m = js.get(key, {}) or {}
+        kcal = int(m.get("kcal", 0))
+        menu = norm_menu(m.get("menu", ""), key)
+        nutrients = m.get("nutrients")
+        if not isinstance(nutrients, dict) or kcal <= 0:
+            nutrients = _compute_nutrients(max(kcal, 1))
+        else:
+            comp = _compute_nutrients(kcal)
+            nutrients = {k: int(round(nutrients.get(k, comp[k]))) for k in comp.keys()}
+        return {"menu": menu, "kcal": int(kcal), "nutrients": nutrients}
+
+    b, l, d = norm_meal("breakfast"), norm_meal("lunch"), norm_meal("dinner")
+    _rescale_meals_to_goal(b, l, d, goal_kcal)
+
+    tk = int(b["kcal"] + l["kcal"] + d["kcal"])
+    tn = _sum_nutrients(_sum_nutrients(b["nutrients"], l["nutrients"]), d["nutrients"])
+    reason = _build_reason(goal_kcal, tn)
+
+    return {
+        "breakfast": b, "lunch": l, "dinner": d,
+        "total_kcal": tk, "goal_kcal": goal_kcal,
+        "total_nutrients": tn,
+        "reason": reason,
+    }
+
+# =========================
+# 7) Endpoints
+# =========================
 @app.get("/ping")
 def ping():
     return {"ok": True}
 
-@app.post("/recommend", response_model=RecommendResponse)
-def recommend(
-    payload: RecommendRequest = Body(...),
-    live: bool = Query(False, description="스프링에서 live=true로 호출")
-):
-    try:
-        res = open_mode_recommend(payload)
-        if live:
-            # 라이브 호출 티만 남김
-            if not res.comment:
-                res.comment = "LIVE"
-            else:
-                res.comment = f"LIVE: {res.comment}"
-        return res
-    except Exception as e:
-        # 모든 예외 → 폴백
-        goal = calc_goal_calories(payload)
-        fb = fallback_response(goal)
-        if live:
-            fb.comment = f"MODEL FALLBACK: {type(e).__name__}"
-        return fb
+@app.post("/recommend")
+async def recommend(req: RecommendRequest, live: bool = Query(False, description="Use LLM if true")):
+    goal = calc_goal_calories(req)
+    if live:
+        js = await llm_complete_open(build_prompt_open(req, goal))
+        if isinstance(js, dict) and {"breakfast", "lunch", "dinner"}.issubset(js.keys()):
+            try:
+                return _ensure_shape_and_fit(js, goal_kcal=goal)
+            except Exception:
+                pass
+    return _fallback_menu(goal)
 
-# ===== 스타트업 워밍업 (선택) =====
-@app.on_event("startup")
-def _warm_up():
-    try:
-        # 서버 자신에게 워밍업 리퀘스트 (비동기 아님: 실패해도 그냥 지나감)
-        url = f"http://127.0.0.1:{APP_PORT}/recommend?live=true"
-        sample = {
-            "gender": "female",
-            "age": 21,
-            "height_cm": 162,
-            "weight_kg": 52,
-            "activity_level": "light"
-        }
-        requests.post(url, json=sample, timeout=5)
-    except Exception:
-        pass
-
-# ===== 메인 =====
+# =========================
+# 8) Dev entry
+# =========================
 if __name__ == "__main__":
-    uvicorn.run("app:app", host="127.0.0.1", port=APP_PORT, reload=False)
+    uvicorn.run("app:app", host="0.0.0.0", port=int(os.getenv("PORT", "8001")), reload=True)

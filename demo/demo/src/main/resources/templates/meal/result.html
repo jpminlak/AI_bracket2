@@ -114,9 +114,29 @@
 
             <div class="total">
                 합계: <span th:text="${r.get('total_kcal')}"></span> kcal
-                (목표: <span th:text="${r.get('goal_calories')}"></span> kcal)
+                (목표: <span th:text="${r.get('goal_kcal')}"></span> kcal)
             </div>
+            <p style="margin-top:8px;color:#555">
+                추천 이유: <span th:text="${r.get('reason')}"></span>
+            </p>
+
+
         </div>
+        <!-- ... 기존 카드 3개/합계 표시까지 동일 ... -->
+
+        <div style="margin-top:16px" class="wrap">
+            <form method="post" th:action="@{/diet/save}">
+                <input type="hidden" name="breakfast"
+                       th:value="${#maps.containsKey(r,'breakfast') ? ((r.get('breakfast') instanceof T(java.util.Map)) ? r.get('breakfast').get('menu') : '') : ''}">
+                <input type="hidden" name="lunch"
+                       th:value="${#maps.containsKey(r,'lunch') ? r.get('lunch').get('menu') : ''}">
+                <input type="hidden" name="dinner"
+                       th:value="${#maps.containsKey(r,'dinner') ? r.get('dinner').get('menu') : ''}">
+                <input type="hidden" name="total_kcal" th:value="${r.get('total_kcal')}">
+                <button class="btn" type="submit">이 식단 저장</button>
+            </form>
+        </div>
+
     </main>
     <footer th:replace="~{common:: footer}"></footer>
 </body>

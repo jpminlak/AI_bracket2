@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>음식 분석 & 추천 - 문의하기</title>
+    <link rel="stylesheet" th:href="@{/main.css}">
+    <style>
+        .write-container {
+            display: flex;
+            justify-content: center;
+            padding: 40px 0;
+        }
+
+        .write-box {
+            background: #fff;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            width: 70%;
+        }
+
+        .write-box h2 {
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 1.8em;
+            color: #222;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #555;
+        }
+
+        .form-group input[type="text"],
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid black;
+            border-radius: 8px;
+            font-size: 16px;
+            box-sizing: border-box;
+            transition: border-color 0.2s;
+        }
+
+        .form-group input[type="text"]:focus,
+        .form-group textarea:focus {
+            border-color: #007bff;
+            outline: none;
+        }
+
+        .btn-container {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .btn-primary {
+            display: inline-block;
+            padding: 10px 20px;
+            font-size: 16px;
+            font-weight: bold;
+            color: #fff;
+            background-color: black;
+            border: none;
+            border-radius: 6px;
+            text-decoration: none;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .btn-primary:hover {
+            background: #acabab;
+            color: black;
+        }
+
+        .alert {
+            text-align: center;
+            color: red;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+
+<body>
+    <header th:replace="~{common:: header}"></header>
+
+    <main>
+        <div class="write-container">
+            <div class="write-box">
+                <h2>문의하기</h2>
+                <div th:if="${alertMessage}" class="alert" th:text="${alertMessage}"></div>
+                <div th:if="${errorMessage}" class="alert" th:text="${errorMessage}"></div>
+                <div th:if="${successMessage}" class="alert" th:text="${successMessage}" style="color:green"></div>
+                <form th:action="@{/inquiry}" th:object="${contactForm}" method="post">
+                    <div class="form-group">
+                        <label for="subject">제목</label>
+                        <input type="text" th:field="*{subject}" id="subject" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="message">내용</label>
+                        <textarea th:field="*{message}" id="message" rows="10" required></textarea>
+                    </div>
+                    <div class="btn-container">
+                        <button type="submit" class="btn-primary">문의 보내기</button>
+                        <a th:href="@{ / }" class="btn-primary">돌아가기</a>
+                        <a th:if="${#authorization.expression('hasRole(''ADMIN'')')}" th:href="@{/inquiry/list}"
+                            class="btn-primary" style="margin-left:10px;">관리자 페이지</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <footer th:replace="~{common:: footer}"></footer>
+</body>
+
+</html>

@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>이용약관 및 개인정보처리방침</title>
+    <link rel="stylesheet" th:href="@{/main.css}">
+    <style>
+        .terms-container {
+            display: flex;
+            justify-content: center;
+            padding: 40px 0;
+        }
+
+        .terms-box {
+            background: #fff;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            width: 70%; /* 약관 내용을 담기 위해 너비를 더 넓게 설정 */
+            line-height: 1.6;
+        }
+
+        .terms-box h2 {
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 1.8em;
+            color: #222;
+        }
+
+        .terms-box h3 {
+            font-size: 1.3em;
+            margin-top: 30px;
+            margin-bottom: 10px;
+            color: #0b0b1a;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 5px;
+        }
+
+        .terms-box h4 {
+            font-size: 1.1em;
+            margin-top: 20px;
+            margin-bottom: 5px;
+            color: #555;
+        }
+
+        .section {
+            display: block;
+            margin: 20px 0 10px;
+            background: linear-gradient(to right, black, darkgray, white);
+            color: white;
+            font-size: 1.1em;
+            font-weight: bold;
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+
+<body>
+    <header th:replace="~{common:: header}"></header>
+
+    <main>
+        <div class="terms-container">
+            <div class="terms-box">
+                <h2>이용약관 및 개인정보처리방침</h2>
+                <span class="section">이용약관</span>
+                <h3>제1조 (목적)</h3>
+                <p>본 약관은 MealMind Project가 제공하는 모든 서비스의 이용과 관련하여 회사와 회원 간의 권리, 의무 및 책임 사항, 기타 필요한 사항을 규정하는 것을 목적으로 합니다.</p>
+
+                <h3>제2조 (용어의 정의)</h3>
+                <p>1. <strong>'서비스'</strong>라 함은 MealMind Project가 구현한 웹사이트 및 모바일 애플리케이션을 통해 회원이 이용할 수 있는 관련 제반 서비스를 의미합니다.</p>
+                <p>2. <strong>'회원'</strong>이라 함은 본 약관에 동의하고 회사와 이용계약을 체결하여 회사가 제공하는 서비스를 이용하는 자를 의미합니다.</p>
+                <p>3. <strong>'게시물'</strong>이라 함은 회원이 서비스를 이용함에 있어 서비스상에 게시한 부호, 문자, 음성, 음향, 화상, 동영상 등의 정보 형태의 글, 사진, 동영상 및 각종 파일과 링크 등을 의미합니다.</p>
+                
+                <span class="section">개인정보 보호정책</span>
+                <h3>1. 개인정보 수집 및 이용 동의 (회원가입 정책)</h3>
+                <p>회원가입 시 개인정보 처리 방침에 대한 동의 여부를 확인하는 과정입니다. 이는 회원가입을 위한 <strong>필수 동의</strong> 사항입니다.</p>
+
+                <h3>2. 회원정보 저장 (개인정보 정책)</h3>
+                <p>회원의 영양 섭취 정보, 식단 정보 등은 맞춤형 서비스를 제공하기 위해 저장됩니다. 이러한 정보의 동의 여부는 <strong>선택 사항</strong>이며, 동의 시 더 나은 맞춤형 서비스 제공이 가능합니다.</p>
+
+                <h3>3. 개인정보 및 이용 내역 보호 (개인정보 정책)</h3>
+                <p>개인정보는 서비스 내부에서만 저장되며, 외부로 반출되거나 통계 자료 외의 목적으로 외부 이용이 <strong>엄격히 금지</strong>됩니다. 모든 회원정보 및 이용 내역은 안전하게 보호됩니다.</p>
+
+                <h3>4. 기록 파기 정책 (개인정보 정책)</h3>
+                <p>회원이 기록 파기를 요청할 경우, 요청일로부터 <strong>30일 이내에 처리</strong>됩니다. 또한, 회원이 탈퇴할 경우 모든 기록은 **1년 후 자동으로 파기</strong>됩니다.</p>
+                
+                <h3>5. 데이터 수집 범위 (데이터 수집 범위)</h3>
+                <p>서비스 내 학습에 사용되는 사진 및 데이터셋 저작권에 관한 정책입니다. 공용 데이터 활용 및 저작권 자료는 <strong>출처 표기 시 공공 목적 사용이 가능</strong>합니다.</p>
+            </div>
+        </div>
+    </main>
+
+    <footer th:replace="~{common:: footer}"></footer>
+</body>
+
+</html>

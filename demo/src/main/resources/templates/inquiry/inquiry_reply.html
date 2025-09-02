@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>문의 상세보기 및 답변하기</title>
+    <link rel="stylesheet" th:href="@{/main.css}">
+    <style>
+        main {
+            max-width: 800px;
+            margin: 40px auto;
+            background: #fff;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        h2 {
+            margin-bottom: 20px;
+            color: #222;
+            text-align: center;
+        }
+
+        .detail-box {
+            margin-bottom: 12px;
+        }
+
+        .detail-box strong {
+            display: inline-block;
+            width: 120px;
+            color: #555;
+        }
+
+        .message-box {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 15px;
+            background: #fafafa;
+            margin: 15px 0 30px 0;
+            white-space: pre-line;
+        }
+
+        .reply-section {
+            margin-top: 30px;
+        }
+
+        .reply-box {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 15px;
+            background: #f9f9ff;
+            margin-bottom: 20px;
+            white-space: pre-line;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            font-weight: bold;
+            color: #555;
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            resize: vertical;
+        }
+
+        .btn-primary {
+            display: inline-block;
+            padding: 10px 20px;
+            font-size: 16px;
+            font-weight: bold;
+            color: #fff;
+            background-color: black;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: 0.3s;
+            text-decoration: none; /* <- 추가: 밑줄 제거 */
+        }
+
+        .btn-primary:hover {
+            background: #acabab;
+            color: black;
+        }
+    </style>
+</head>
+
+<body>
+    <header th:replace="~{common::header}"></header>
+    <main>
+        <h2>문의 상세보기</h2>
+
+        <!-- 회원이 작성한 문의 내용 -->
+        <div class="detail-box"><strong>회원ID:</strong> <span th:text="${inquiry.member.memberId}"></span></div>
+        <div class="detail-box"><strong>회원명:</strong> <span th:text="${inquiry.member.memberName}"></span></div>
+        <div class="detail-box"><strong>이메일:</strong> <span th:text="${inquiry.member.email}"></span></div>
+        <div class="detail-box"><strong>등록일:</strong> <span
+                th:text="${#temporals.format(inquiry.regDate, 'yyyy-MM-dd HH:mm')}"></span></div>
+        <div class="detail-box"><strong>제목:</strong> <span th:text="${inquiry.subject}"></span></div>
+        <div class="message-box" th:text="${inquiry.message}"></div>
+        <hr>
+        <!-- <h3>관리자 답변</h3>
+        <form th:action="@{/inquiry/reply/{id}(id=${inquiry.id})}" method="post">
+            <div class="form-group">-->
+        <!--<textarea id="replyMessage" name="replyMessage" rows="6" required></textarea>
+            </div>
+            <button type="submit" class="btn-primary">답변 보내기</button>
+        </form> -->
+
+        <h3>관리자 답변</h3>
+        <div th:if="${inquiry.answered}">보낸 답변
+            <div class="reply-box" th:text="${inquiry.replyMessage}"></div>
+        </div>
+        답장
+        <form th:action="@{/inquiry/reply/{id}(id=${inquiry.id})}" method="post">
+            <div class="form-group">
+                <textarea id="replyMessage" name="replyMessage" rows="6" th:text="${inquiry.replyMessage}"
+                    required></textarea>
+            </div>
+            <div class="btn-container">
+                <button type="submit" class="btn-primary">답변 보내기</button>
+                <a th:href="@{/inquiry/list}" class="btn-primary" style="margin-left: 10px;">돌아가기</a>
+            </div>
+        </form>
+    </main>
+    <footer th:replace="~{common::footer}"></footer>
+</body>
+
+</html>

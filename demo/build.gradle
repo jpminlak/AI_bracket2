@@ -1,0 +1,66 @@
+plugins {
+	id 'java'
+	id 'war'
+	id 'org.springframework.boot' version '3.5.4'
+	id 'io.spring.dependency-management' version '1.1.7'
+}
+
+group = 'com.example'
+version = '0.0.1-SNAPSHOT'
+
+java {
+	toolchain {
+		languageVersion = JavaLanguageVersion.of(17)
+	}
+}
+
+configurations {
+	compileOnly {
+		extendsFrom annotationProcessor
+	}
+}
+
+repositories {
+	mavenCentral()
+}
+
+dependencies {
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
+    implementation 'nz.net.ultraq.thymeleaf:thymeleaf-layout-dialect'
+    //implementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter:3.0.3' // MyBatis. 현재 JPA 사용중이라 주석 처리.
+    implementation 'org.springframework.boot:spring-boot-starter-jdbc' // JDBC 기능 사용 시 필요
+    implementation 'org.mariadb.jdbc:mariadb-java-client:3.3.3'
+
+    // Spring Security
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+    implementation 'org.thymeleaf.extras:thymeleaf-extras-springsecurity6'
+
+    // Spring Data JPA
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    compileOnly 'org.projectlombok:lombok'
+	developmentOnly 'org.springframework.boot:spring-boot-devtools'
+	annotationProcessor 'org.projectlombok:lombok'
+	providedRuntime 'org.springframework.boot:spring-boot-starter-tomcat'
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	//testImplementation 'org.springframework.security:spring-security-test'
+	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+    // E-Mail
+//    implementation 'org.springframework.boot:spring-boot-starter-mail'
+//    implementation 'jakarta.mail:jakarta.mail-api:2.0.2'
+//    implementation 'com.sun.mail:jakarta.mail:2.0.2'
+//    implementation 'jakarta.activation:jakarta.activation-api:2.1.2'
+
+    // doyun
+    //implementation 'org.springframework.boot:spring-boot-starter-webflux' // ★ 추가
+    //implementation 'org.springframework:spring-webflux' // WebClient
+    //implementation 'com.fasterxml.jackson.core:jackson-databind'
+}
+
+tasks.named('test') {
+	useJUnitPlatform()
+}

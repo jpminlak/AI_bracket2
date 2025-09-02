@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="kor" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>음식 분석 & 추천 - 메인</title>
+    <link rel="stylesheet" th:href="@{main.css}">
+</head>
+<style>
+    .main {
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+        padding: 40px;
+        height: 850px;
+    }
+
+    .slider {
+        flex: 1;
+        /* 사진과 description의 비율을 강제하지만, 그냥 놔두면 사진이 화면을 대부분 잡아먹어버림. 현재 width=50% 와 같은 효과를 줌. */
+        text-align: center;
+        position: relative;
+        /*max-width: 500px;
+        max-height: 800px;*/
+    }
+
+    .slider img {
+        width: 100%;
+        height: auto;
+        border-radius: 10px;
+        display: none;
+    }
+
+    .slider img.active {
+        display: block;
+    }
+
+    .slider button {
+        border: none;
+        background: rgba(0, 0, 0, 0.6);
+        color: white;
+        font-size: 18px;
+        padding: 10px 15px;
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        cursor: pointer;
+        border-radius: 50%;
+    }
+
+    .slider button.prev {
+        left: 10px;
+    }
+
+    .slider button.next {
+        right: 10px;
+    }
+
+    .description {
+        flex: 1;
+        padding: 0 40px;
+    }
+
+    .description h2 {
+        font-size: 20px;
+        margin-bottom: 20px;
+    }
+
+    .description ul {
+        list-style: none;
+        padding: 0;
+    }
+
+    .description ul li {
+        margin: 10px 0;
+    }
+
+    .description ul li:before {
+        content: "✔ ";
+        color: green;
+    }
+</style>
+
+<body>
+    <!-- 상단 네비게이션 -->
+    <header th:replace="~{common:: header}"></header>
+
+    <!-- 메인 콘텐츠 -->
+    <main>
+        <div class="main">
+            <div class="slider" id="slider">
+                <!-- 이미지가 JS로 삽입됨 -->
+                <button class="prev">&#10094;</button>
+                <button class="next">&#10095;</button>
+            </div>
+            <div class="description">
+                <h2>AI 기반 맞춤형 음식 추천 서비스</h2>
+                <p>사진 한 장으로 음식의 영양소를 분석하고, 개인 맞춤형 건강한 식단을 추천해드립니다.</p>
+                <ul>
+                    <li>음식 사진을 찍어 영양소를 즉시 분석</li>
+                    <li>개인 건강 상태에 맞는 식단 추천</li>
+                    <li>일일 영양소 섭취량 기록 및 관리</li>
+                </ul>
+                <p>건강한 식습관 형성을 위한 스마트한 솔루션을 경험해보세요.</p>
+            </div>
+        </div>
+    </main>
+
+    <!-- 푸터 -->
+    <footer th:replace="~{common:: footer}"></footer>
+</body>
+
+<!-- 슬라이더 JS -->
+<script>
+    const foodImages = [
+        {
+            src: "https://images.unsplash.com/photo-1590301157890-4810ed352733?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080",
+            alt: "Korean Bibimbap"
+        },
+        {
+            src: "https://images.unsplash.com/photo-1711539137930-3fa2ae6cec60?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080",
+            alt: "Delicious Pasta"
+        },
+        {
+            src: "https://images.unsplash.com/photo-1606757819934-d61a9f7279d5?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080",
+            alt: "Fresh Healthy Salad"
+        },
+        {
+            src: "https://images.unsplash.com/photo-1720514091975-a322721f0dc3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080",
+            alt: "Grilled Salmon"
+        }
+    ];
+
+    const slider = document.getElementById("slider");
+    let currentIndex = 0;
+
+    // 이미지 삽입
+    foodImages.forEach((img, index) => {
+        const imageElement = document.createElement("img");
+        imageElement.src = img.src;
+        imageElement.alt = img.alt;
+        if (index === 0) imageElement.classList.add("active");
+        slider.insertBefore(imageElement, slider.querySelector(".prev"));
+    });
+
+    const images = slider.querySelectorAll("img");
+
+    function showImage(index) {
+        images.forEach(img => img.classList.remove("active"));
+        images[index].classList.add("active");
+    }
+
+    document.querySelector(".prev").addEventListener("click", () => {
+        currentIndex = (currentIndex - 1 + images.length) % images.length;
+        showImage(currentIndex);
+    });
+
+    document.querySelector(".next").addEventListener("click", () => {
+        currentIndex = (currentIndex + 1) % images.length;
+        showImage(currentIndex);
+    });
+
+    // 자동 슬라이드 (5초마다 변경)
+    setInterval(() => {
+        currentIndex = (currentIndex + 1) % images.length;
+        showImage(currentIndex);
+    }, 5000);
+</script>
+
+</html>

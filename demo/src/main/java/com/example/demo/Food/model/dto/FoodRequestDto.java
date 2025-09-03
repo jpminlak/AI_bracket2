@@ -1,4 +1,4 @@
-package com.example.demo.food.model.dto;
+package com.example.demo.Food.model.dto;
 
 
 import lombok.*;

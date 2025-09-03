@@ -14,13 +14,16 @@ public class Member {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Long num;
 
     @Column(unique = true, length = 20)
     private String memberId;
 
     @Column(length = 50)
-    private String username;
+    private String memberName;
+
+    //@Column(name = "username", length = 50) // DB에 username으로 매핑된 컬럼을 바꾸기 위해 일시적으로 사용.
+    //private String memberName;
 
     @Column     // length 기본값 255
     private String password;

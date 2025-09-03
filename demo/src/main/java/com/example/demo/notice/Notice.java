@@ -18,7 +18,7 @@ public class Notice {
     private Integer noticeId;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "member_id", referencedColumnName = "memberId")
+    @JoinColumn(name = "member_num")
     private Member author;
 
     private String noticeTitle;

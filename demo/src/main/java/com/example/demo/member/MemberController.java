@@ -6,6 +6,7 @@ import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.Page;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -35,7 +36,7 @@ public class MemberController {
     @GetMapping("/login")
     public String login(@RequestParam(value = "needLogin", required = false) String needLogin, Model model) {
         if ("true".equals(needLogin)) {
-            model.addAttribute("loginMessage", "로그인을 하셔야 회원정보를 볼 수 있습니다.");
+            //model.addAttribute("loginMessage", "로그인을 하셔야 서비스를 이용하실 수 있습니다.");
         }
         return "/member/login";
     }
@@ -43,6 +44,14 @@ public class MemberController {
     @GetMapping("/mypage")
     public String mypage(Principal principal, Model model, RedirectAttributes redirectAttributes) {
         return "/member/mypage";
+    }
+
+    @GetMapping("/list")
+    public String list(Model model,
+                       @RequestParam(value = "page", defaultValue = "0") int page) {
+        Page<Member> paging = memberService.getList(page, 10);  // 한 페이지에 10명씩
+        model.addAttribute("paging", paging);
+        return "/member/member_list";
     }
 
     @GetMapping("/signup")
@@ -96,7 +105,7 @@ public class MemberController {
 
             MemberModifyForm memberModifyForm = new MemberModifyForm();
             memberModifyForm.setMemberId(member.getMemberId());
-            memberModifyForm.setUsername(member.getUsername());
+            memberModifyForm.setMemberName(member.getMemberName());
             memberModifyForm.setEmail(member.getEmail());
             memberModifyForm.setTel(member.getTel());
             memberModifyForm.setBirthday(member.getBirthday());
@@ -106,7 +115,6 @@ public class MemberController {
 
             model.addAttribute("memberModifyForm", memberModifyForm);
         }
-
         return "/member/modify";
     }
 
@@ -116,7 +124,6 @@ public class MemberController {
         if (bindingResult.hasErrors()) {
             return "/member/modify";
         }
-
         if (!memberModifyForm.getPassword1().equals(memberModifyForm.getPassword2())) {
             bindingResult.rejectValue("password2", "passwordInCorrect",
                     "2개의 패스워드가 일치하지 않습니다.");

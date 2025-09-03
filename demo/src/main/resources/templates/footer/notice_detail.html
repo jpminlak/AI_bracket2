@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>공지사항 상세</title>
+    <link rel="stylesheet" th:href="@{/main.css}">
+    <style>
+        .notice-detail {
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 30px;
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .notice-detail h2 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .notice-detail .date {
+            text-align: right;
+            color: #888;
+            margin-bottom: 20px;
+        }
+
+        .notice-detail .content {
+            line-height: 1.6;
+            white-space: pre-line;  /* 엔터(\n)를 줄바꿈으로 표시 */
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            width: 100%;
+            padding: 12px;
+            border: 1px solid black;
+            border-radius: 8px;
+            font-size: 16px;
+            box-sizing: border-box;
+            transition: border-color 0.2s;
+        }
+
+        .btn-back {
+            display: inline-block;
+            margin-top: 30px;
+            padding: 10px 20px;
+            font-size: 16px;
+            font-weight: bold;
+            background: black;
+            color: #fff;
+            border-radius: 6px;
+            text-decoration: none;
+        }
+
+        .btn-back:hover {
+            background: #acabab;
+            color: black;
+        }
+    </style>
+</head>
+
+<body>
+    <header th:replace="~{common::header}"></header>
+
+    <main>
+        <div class="notice-detail">
+            <div class="form-group">
+                <h2 th:text="${notice.noticeTitle}">공지 제목</h2>
+                <div class="date" th:text="${#temporals.format(notice.regDate, 'yyyy-MM-dd HH:mm')}">2025-09-01 12:00
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="content" th:utext="${notice.noticeContent}">공지 내용</div>
+            </div>
+            <a th:href="@{/notice}" class="btn-back">목록으로</a>
+        </div>
+    </main>
+
+    <footer th:replace="~{common::footer}"></footer>
+</body>
+
+</html>

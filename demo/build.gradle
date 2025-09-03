@@ -49,12 +49,16 @@ dependencies {
 	//testImplementation 'org.springframework.security:spring-security-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
+    // E-Mail
+//    implementation 'org.springframework.boot:spring-boot-starter-mail'
+//    implementation 'jakarta.mail:jakarta.mail-api:2.0.2'
+//    implementation 'com.sun.mail:jakarta.mail:2.0.2'
+//    implementation 'jakarta.activation:jakarta.activation-api:2.1.2'
+
     // doyun
     //implementation 'org.springframework.boot:spring-boot-starter-webflux' // ★ 추가
     //implementation 'org.springframework:spring-webflux' // WebClient
-    //implementation 'org.springframework.boot:spring-boot-starter-webflux'   // ⬅️ 이 줄 필수
     //implementation 'com.fasterxml.jackson.core:jackson-databind'
-
 }
 
 tasks.named('test') {

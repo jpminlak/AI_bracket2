@@ -1,125 +1,126 @@
 package com.example.demo.meal.controller;
 
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.*;
+import com.example.demo.food.model.Food;
+import com.example.demo.food.Repository.FoodRepository;
+import com.example.demo.meal.DietService;
+import com.example.demo.member.Member;
+import com.example.demo.member.MemberService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.client.RestTemplate;
-import org.springframework.web.util.UriComponentsBuilder;
+import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.*;
 
+@RequiredArgsConstructor
 @Controller
-@RequestMapping("/diet")
 public class DietController {
 
-    @Value("${diet.api-base}")
-    private String apiBase;     // 예: http://127.0.0.1:8001
+    private final DietService dietService;
+    private final MemberService memberService;
+    private final FoodRepository foodRepository;
 
-    // 간단 버전: 컨트롤러 내부에서 RestTemplate 생성
-    private final RestTemplate rest = new RestTemplate();
+    /** 식단추천 폼 */
+    @GetMapping("/diet")
+    public String dietForm(Model model, Authentication auth) {
+        model.addAttribute("today", LocalDate.now());
+        Member me = resolveCurrentMember(auth);
+        LocalDateTime todayStart = LocalDate.now().atStartOfDay();
 
-    /** 폼 페이지 */
-    @GetMapping
-    public String form(Model model) {
-        model.addAttribute("today", java.time.LocalDate.now().toString());
-        model.addAttribute("gender", "female");
-        model.addAttribute("age", 29);
-        model.addAttribute("height", 165);
-        model.addAttribute("weight", 62);
+        List<Food> breakfastList = fillToFive(
+                foodRepository.findTop5ByMember_NumAndMealTimeAndRegDateAfterOrderByRegDateDesc(me.getNum(), "breakfast", todayStart));
+        List<Food> lunchList = fillToFive(
+                foodRepository.findTop5ByMember_NumAndMealTimeAndRegDateAfterOrderByRegDateDesc(me.getNum(), "lunch", todayStart));
+        List<Food> dinnerList = fillToFive(
+                foodRepository.findTop5ByMember_NumAndMealTimeAndRegDateAfterOrderByRegDateDesc(me.getNum(), "dinner", todayStart));
+
+        model.addAttribute("breakfastList", breakfastList);
+        model.addAttribute("lunchList", lunchList);
+        model.addAttribute("dinnerList", dinnerList);
+
+        // ✅ 총 칼로리 합산
+        double totalCalories = sumCalories(breakfastList) + sumCalories(lunchList) + sumCalories(dinnerList);
+        model.addAttribute("totalCalories", totalCalories);
+
         return "meal/diet";
     }
 
-    /** 추천 실행: 항상 라이브로 호출 + 전날식단(아침만) 예시 보정 포함 */
-    @PostMapping("/recommend")
+    /** 리스트를 항상 5개로 맞추는 헬퍼 */
+    private List<Food> fillToFive(List<Food> list) {
+        List<Food> result = new ArrayList<>(list);
+        while (result.size() < 5) {
+            result.add(new Food()); // 기본 생성자로 빈 Food 추가
+        }
+        return result;
+    }
+
+    /** Food 리스트 칼로리 합계 */
+    private double sumCalories(List<Food> foods) {
+        return foods.stream()
+                .filter(f -> f.getCalories() != null)
+                .mapToDouble(Food::getCalories)
+                .sum();
+    }
+
+    /** 추천 실행 */
+    @PostMapping("/diet/recommend")
     public String recommend(
-            @RequestParam String gender,
-            @RequestParam Integer age,
-            @RequestParam(name = "height") Double heightCm,
-            @RequestParam(name = "weight") Double weightKg,
+            @RequestParam String sex,
+            @RequestParam Double height,
+            @RequestParam Double weight,
+            Authentication auth,
             Model model
     ) {
-        // FastAPI 요청 바디(JSON) — 키 이름 중요
-        Map<String, Object> body = new HashMap<>();
-        body.put("gender", gender);
-        body.put("age", age);
-        body.put("height_cm", heightCm);
-        body.put("weight_kg", weightKg);
-
-        // 전날식단 예시(아침만 보정: 탄수 부족 가정) — 데모용
-        Map<String, Object> prevBreakfast = new HashMap<>();
-        prevBreakfast.put("carbs_g", 30);
-        prevBreakfast.put("protein_g", 20);
-        prevBreakfast.put("fat_g", 10);
-        prevBreakfast.put("fiber_g", 5);
-        prevBreakfast.put("sodium_mg", 700);
-        Map<String, Object> previousDay = new HashMap<>();
-        previousDay.put("breakfast", prevBreakfast);
-        body.put("previous_day", previousDay);
-
-        // 항상 라이브 호출
-        String url = UriComponentsBuilder
-                .fromHttpUrl(apiBase + "/recommend")
-                .queryParam("live", true)
-                .toUriString();
-
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        HttpEntity<Map<String, Object>> req = new HttpEntity<>(body, headers);
-
-        Map<String, Object> r;
-        try {
-            ResponseEntity<Map> resp = rest.exchange(url, HttpMethod.POST, req, Map.class);
-            r = (resp.getStatusCode().is2xxSuccessful() && resp.getBody() != null)
-                    ? resp.getBody() : fallback();
-        } catch (Exception e) {
-            r = fallback();
-        }
-
+        Map<String, Object> r = dietService.recommend(sex, height, weight);
         model.addAttribute("r", r);
         return "meal/result";
     }
 
-    /** FastAPI 실패 시 폴백(영양소 포함) */
-    private Map<String, Object> fallback() {
-        Map<String, Object> r = new HashMap<>();
-        r.put("date", java.time.LocalDate.now().toString());
-        r.put("goal_calories", 1700);
-        r.put("comment", "서버 예시 결과를 표시합니다. FastAPI가 꺼져 있거나 모델 호출 실패.");
+    /** 추천 저장 */
+    @PostMapping("/diet/save")
+    public String save(
+            @RequestParam String breakfast,
+            @RequestParam String lunch,
+            @RequestParam String dinner,
+            @RequestParam("total_kcal") Integer totalKcal,
+            Authentication auth
+    ) {
+        Member me = resolveCurrentMember(auth);
 
-        Map<String, Object> b = new HashMap<>();
-        b.put("menu", "현미밥 150g + 계란 2개");
-        b.put("kcal", 500);
-        Map<String, Object> nb = new HashMap<>();
-        nb.put("carbs_g", 60); nb.put("protein_g", 28);
-        nb.put("fat_g", 18);   nb.put("fiber_g", 6);  nb.put("sodium_mg", 900);
-        b.put("nutrients", nb);
+        Map<String, Object> r = Map.of(
+                "breakfast", Map.of("menu", breakfast),
+                "lunch",     Map.of("menu", lunch),
+                "dinner",    Map.of("menu", dinner),
+                "total_kcal", totalKcal
+        );
+        dietService.saveFromResult(me, r);
+        return "redirect:/record";
+    }
 
-        Map<String, Object> l = new HashMap<>();
-        l.put("menu", "닭가슴살 샐러드 + 고구마 150g");
-        l.put("kcal", 650);
-        Map<String, Object> nl = new HashMap<>();
-        nl.put("carbs_g", 55); nl.put("protein_g", 35);
-        nl.put("fat_g", 15);   nl.put("fiber_g", 8);  nl.put("sodium_mg", 850);
-        l.put("nutrients", nl);
+    @GetMapping("/record")
+    public String record(Authentication auth, Model model) {
+        Member me = resolveCurrentMember(auth);
+        List<com.example.demo.meal.Diet> diets = dietService.findMyDiets(me.getNum());
+        model.addAttribute("diets", diets);
+        return "meal/record";
+    }
 
-        Map<String, Object> d = new HashMap<>();
-        d.put("menu", "잡곡밥 120g + 연어구이 120g");
-        d.put("kcal", 550);
-        Map<String, Object> nd = new HashMap<>();
-        nd.put("carbs_g", 45); nd.put("protein_g", 32);
-        nd.put("fat_g", 16);   nd.put("fiber_g", 7);  nd.put("sodium_mg", 950);
-        d.put("nutrients", nd);
-
-        r.put("breakfast", b);
-        r.put("lunch", l);
-        r.put("dinner", d);
-        r.put("total_kcal", 1700);
-        return r;
+    /** 현재 인증된 Member 가져오기 */
+    private Member resolveCurrentMember(Authentication auth){
+        if (auth == null || auth.getName() == null) {
+            throw new IllegalStateException("인증정보 없음");
+        }
+        String key = auth.getName();
+        Optional<Member> byLoginId = memberService.findByMemberId(key);
+        if(byLoginId.isPresent()) return byLoginId.get();
+        try {
+            Long id = Long.valueOf(key);
+            Optional<Member> byId = memberService.findByNum(id);
+            if (byId.isPresent()) return byId.get();
+        } catch (NumberFormatException ignore) { }
+        throw new IllegalStateException("회원 없음");
     }
 }

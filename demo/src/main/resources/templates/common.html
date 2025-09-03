@@ -5,9 +5,9 @@
     <!-- 상단 네비게이션 -->
     <header th:fragment="header">
         <div class="welcome">
-            <span sec:authorize="isAnonymous()">음식 추천 서비스에 오신 것을 환영합니다.</span>
+            <span sec:authorize="isAnonymous()">MealMind에 오신 것을 환영합니다.</span>
             <span sec:authorize="isAuthenticated()">
-                <span th:text="${#authentication.principal.member.username}"></span>님 환영합니다!
+                <span th:text="${#authentication.principal.member.memberName}"></span>님 환영합니다!
             </span>
         </div>
         <nav>
@@ -46,7 +46,7 @@
             <h4>연락처</h4>
             <p>주소: 경기도 수원시 팔달구 중부대로 104</p>
             <p>전화: 031-234-5678</p>
-            <p>이메일: contact@mealstaffcom</p>
+            <p>이메일: contact@mealstaff.com</p>
         </div>
         <div class="footer-bottom">
             © 2025 MealStaff. All rights reserved.

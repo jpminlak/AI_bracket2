@@ -7,11 +7,16 @@ import torch.nn.functional as F
 import httpx
 import os
 import re
+import pickle
 
 # =========================
 # 1️⃣ FastAPI 초기화 + CORS
 # =========================
+
+
 app = FastAPI()
+
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -20,11 +25,13 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
 # =========================
 # 2️⃣ 요청 스키마
 # =========================
 class TextRequest(BaseModel):
     text: str
+
 
 # =========================
 # 3️⃣ 모델 로딩
@@ -32,19 +39,23 @@ class TextRequest(BaseModel):
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 MODEL_DIR = "./kobert_emotion_model"
 
+
 # 토크나이저
 try:
     tokenizer = AutoTokenizer.from_pretrained(MODEL_DIR, use_fast=True)
 except Exception:
     tokenizer = AutoTokenizer.from_pretrained(MODEL_DIR, use_fast=False, trust_remote_code=True)
 
+
 # 모델
 model = BertForSequenceClassification.from_pretrained(MODEL_DIR, trust_remote_code=True)
 model.to(device)
 model.eval()
 
+
 # 라벨 클래스
 label_classes = ['공포', '놀람', '분노', '슬픔', '중립', '행복', '혐오']
+
 
 # 감정 키워드
 emotion_keywords = {
@@ -56,20 +67,25 @@ emotion_keywords = {
     "혐오": ["역겹", "싫어", "구역질", "짜증"]
 }
 
+
 # 부정어/반전
 negation_words = ["안", "못", "없", "아니", "지않"]
 
 # =========================
 # 4️⃣ Gemini API 설정
 # =========================
+
 API_KEY = os.getenv("API_KEY", "AIzaSyBB6Xxfls9a34gXycyP7uiex0OPXS8gXL4")
 API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent"
 
 async def call_gemini(emotion: str) -> str:
+    context = pickle.load(open(f"./emotion_bins/{emotion}.bin", "rb"))
+    
     prompt = (
-        f"'{emotion}' 감정일 때 먹으면 좋은 음식 세 가지를 추천해줘. "
-        f"각 음식은 번호를 붙이고, 음식 이름과 간단한 이유를 덧붙여줘."
-    )
+    f"다음은 '{emotion}' 감정에 대한 배경 설명이야:\n{context}\n\n"
+    f"이 감정에 맞는 음식을 세 가지 추천해줘. "
+    f"각 음식은 번호를 붙이고, 음식 이름과 간단한 이유를 덧붙여줘."
+)
     headers = {"Content-Type": "application/json"}
     payload = {"contents": [{"parts": [{"text": prompt}]}]}
     try:
@@ -82,9 +98,11 @@ async def call_gemini(emotion: str) -> str:
         print(f"LLM API 호출 오류: {e}")
         raise HTTPException(status_code=500, detail="LLM API 호출 실패")
 
+
 # =========================
 # 5️⃣ 감정 예측 + 추천 API
 # =========================
+
 def adjust_emotion_by_keywords(text: str, probs: torch.Tensor) -> torch.Tensor:
     text_proc = re.sub(r"\s+", "", text)  # 공백 제거
     for idx, label in enumerate(label_classes):
@@ -98,21 +116,28 @@ def adjust_emotion_by_keywords(text: str, probs: torch.Tensor) -> torch.Tensor:
                 else:
                     # 일반 키워드면 확률 증가
                     probs[idx] += 0.3
+                    
     # 정규화
-    probs = probs / probs.sum()
+    probs = probs / probs.sum()  
     return probs
 
 @app.post("/predict")
 async def predict(req: TextRequest):
+    
     try:
+        
         text = req.text.strip()
+        
         encoding = tokenizer(
+            
             text,
             truncation=True,
             padding="max_length",
             max_length=256,
             return_tensors="pt"
+            
         )
+        
         input_ids = encoding['input_ids'].to(device)
         attention_mask = encoding['attention_mask'].to(device)
 
@@ -131,9 +156,7 @@ async def predict(req: TextRequest):
         recommendation = await call_gemini(pred_label)
 
         return {
-            "text": text,
             "predicted_emotion": pred_label,
-            "emotion_probs": {label_classes[i]: float(f"{probs[i]:.3f}") for i in range(len(label_classes))},
             "recommendation": recommendation
         }
 
@@ -147,3 +170,6 @@ async def predict(req: TextRequest):
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)
+
+
+

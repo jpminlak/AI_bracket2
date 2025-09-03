@@ -17,6 +17,16 @@ public class MemberContext extends User {
         return member;
     }
 
+    @Override
+    public String getUsername() {
+        return member.getMemberId(); // 로그인 ID
+    }
+
+    public String getMemberName() {
+        return member.getMemberName();
+    }
+
+    @Override
     public boolean isEnabled() {
         // status가 NULL이면 정상 회원으로 간주
         return member.getStatus() == null || member.getStatus() == MemberStatus.ACTIVE;

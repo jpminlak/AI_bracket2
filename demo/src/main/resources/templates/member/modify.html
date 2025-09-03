@@ -37,14 +37,8 @@
             border: 1px solid #ccc;
             border-radius: 6px;
             font-size: 14px;
-        }
-
-        .signup-box input {
-            width: 85%;
-        }
-
-        .signup-box select {
             width: 100%;
+            box-sizing: border-box; /* box-sizing을 border-box로 설정하여 padding과 border를 너비에 포함시킵니다. */
         }
 
         .signup-box input:focus,
@@ -127,8 +121,8 @@
                     <div class="form-row">
                         <label for="memberId">ID</label>
                         <span id="memberId" th:text="*{memberId}"></span>
-                        <label for="username">이름 * </label>
-                        <input type="text" id="username" th:field="*{username}">
+                        <label for="memberName">이름 * </label>
+                        <input type="text" id="memberName" th:field="*{memberName}">
                     </div>
                     <div class="form-row">
                         <label for="password">비밀번호 *</label>
@@ -140,7 +134,7 @@
                     <span class="section">신체 정보</span>
                     <div class="form-row">
                         <label for="sex">성별 *</label>
-                        <select id="sex"  th:field="*{sex}">
+                        <select id="sex" th:field="*{sex}">
                             <option value="" selected disabled hidden>성별을 선택해주세요.</option>
                             <option value="남">남</option>
                             <option value="여">여</option>
@@ -178,4 +172,5 @@
 
     <footer th:replace="~{common:: footer}"></footer>
 </body>
+
 </html>

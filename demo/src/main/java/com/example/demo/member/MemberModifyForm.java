@@ -19,7 +19,7 @@ public class MemberModifyForm {
     private String memberId; // ID는 수정하지 않는 것이 일반적입니다.
 
     @NotEmpty(message = "이름은 필수항목입니다.")
-    private String username;
+    private String memberName;
 
     @NotEmpty(message = "비밀번호는 필수항목입니다.")
     private String password1;

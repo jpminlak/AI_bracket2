@@ -1,13 +1,11 @@
-package com.example.demo.Food.model;
+package com.example.demo.food.model;
 
-
+import com.example.demo.member.Member;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
 
-
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "food")
@@ -18,23 +16,48 @@ import lombok.NoArgsConstructor;
 public class Food {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long Id;
+    private Long id;
 
-    //음식 이름
+    // 식품명
+    @Column(name = "food_name", nullable = false)
     private String foodName;
 
-    //음식 칼로리
-    private Integer foodCalories;
-    //음식 탄수화물
-    private Integer foodCarbohydrates;
-    //음식 단백질
-    private Integer foodProtein;
-    //음식 지방
-    private Integer foodFat;
-    //음식에 대한 설명
-    private String foodDescription;
+    // 에너지(kcal)
+    @Column(name = "calories")
+    private Double calories;
 
-    //업로드하면 저장되는 경로
-    private String imagePath;
+    // 단백질(g)
+    @Column(name = "protein")
+    private Double protein;
 
+    // 지방(g)
+    @Column(name = "fat")
+    private Double fat;
+
+    // 탄수화물(g)
+    @Column(name = "carbohydrates")
+    private Double carbohydrates;
+
+    // 식사 시간 (아침/점심/저녁/없음)
+    @Column(name = "meal_time")
+    private String mealTime;
+
+    @CreationTimestamp
+    @Column(name = "reg_date", nullable = false, updatable = false, columnDefinition = "DATETIME")
+    private LocalDateTime regDate;
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "member_num") // food 테이블에 member 외래키 생성
+    private Member member;
+
+    // 나트륨(mg)
+//    @Column(name = "sodium")
+//    private Double sodium;
+//
+//    // 기타 필요한 필드 추가
+//    @Column(name = "moisture")
+//    private Double moisture;
+//
+//    @Column(name = "dietary_fiber")
+//    private Double dietaryFiber;
 }

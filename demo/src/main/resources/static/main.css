@@ -32,6 +32,34 @@
         font-weight: bold;
     }
 
+    /* 페이징 */
+    .pagination {
+        margin-top: 20px;
+        text-align: center;
+    }
+
+    .pagination a {
+        margin: 0 4px;
+        padding: 6px 12px;
+        border-radius: 4px;
+        text-decoration: none;
+        color: black;
+        font-weight: bold;
+        border: 1px solid #ddd;
+        background: #fff;
+        transition: .2s;
+    }
+
+    .pagination a:hover {
+        background: #f2f2f2;
+    }
+
+    .pagination .active {
+        background: black;
+        color: #fff;
+        pointer-events: none;
+    }
+
     footer {
         background: #0b0b1a;
         color: #ccc;

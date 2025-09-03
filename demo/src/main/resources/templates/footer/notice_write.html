@@ -56,8 +56,15 @@
             outline: none;
         }
 
-        .btn-container {
+        /*.btn-container {
             text-align: center;
+        }*/
+
+        .btn-container {
+            display: flex;  /* 가로 배치 */
+            justify-content: center;    /* 중앙 정렬 */
+            gap: 10px;  /* 버튼 사이 간격 */
+            margin-top: 20px;
         }
 
         .btn-primary {
@@ -98,8 +105,12 @@
                         <label for="noticeContent">내용</label>
                         <textarea id="noticeContent" name="noticeContent" rows="10" required></textarea>
                     </div>
+                    <!-- <div class="btn-container">
+                        <button type="submit" class="btn-primary">등록</button>
+                    </div> -->
                     <div class="btn-container">
                         <button type="submit" class="btn-primary">등록</button>
+                        <a th:href="@{/notice}" class="btn-primary" style="margin-left: 10px;">돌아가기</a>
                     </div>
                 </form>
             </div>

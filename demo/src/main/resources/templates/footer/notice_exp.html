@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>음식 분석 & 추천 - 공지사항</title>
+    <link rel="stylesheet" th:href="@{/main.css}">
+    <style>
+        main.notice-list {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 40px 0;
+        }
+
+        h2 {
+            margin-bottom: 20px;
+            font-size: 1.8em;
+            color: #222;
+            text-align: center;
+        }
+
+        /* 테이블 감싸는 div */
+        .table-wrapper {
+            width: 90%;
+            border: 1px solid black;
+            border-radius: 12px;
+            overflow: hidden;
+            margin: 0 auto;
+        }
+
+        .table-wrapper table {
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: fixed;
+        }
+
+        thead {
+            background: #f2f2f2;
+            text-align: center;
+        }
+
+        th,
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #ddd;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* 세로 구분선 */
+        th:not(:last-child),
+        td:not(:last-child) {
+            border-right: 1px solid #ddd;
+        }
+
+        th {
+            font-weight: bold;
+            color: #444;
+        }
+
+        tbody td {
+            text-align: left;
+        }
+
+        /* 열 비율 (합 = 100%) */
+        th:nth-child(1),
+        td:nth-child(1) {
+            width: 70%;
+        }
+
+        th:nth-child(2),
+        td:nth-child(2) {
+            width: 30%;
+            text-align: right;
+            color: #888;
+            font-size: 0.9em;
+        }
+
+        tr:hover {
+            background: #fafafa;
+        }
+
+        /* 글쓰기 버튼 */
+        .btn-primary {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 16px;
+            font-weight: bold;
+            color: #fff;
+            background-color: black;
+            border: none;
+            border-radius: 6px;
+            text-decoration: none;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .btn-primary:hover {
+            background: #acabab;
+            color: black;
+        }
+
+        /* 돌아가기 버튼 중앙 정렬 */
+        .btn-back-container {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .btn-back {
+            display: inline-block;
+            padding: 10px 20px;
+            font-size: 16px;
+            font-weight: bold;
+            color: #fff;
+            background: #000;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: .3s;
+            text-decoration: none;
+        }
+
+        .btn-back:hover {
+            background: #acabab;
+            color: #000;
+        }
+    </style>
+</head>
+
+<body>
+    <header th:replace="~{common:: header}"></header>
+
+    <main class="notice-list">
+        <h2>공지사항</h2>
+
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th>제목</th>
+                        <th>작성일</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="notice : ${noticeList}">
+                        <td><a th:href="@{/notice/{id}(id=${notice.noticeId})}" th:text="${notice.noticeTitle}"></a></td>
+                        <td th:text="${#temporals.format(notice.regDate, 'yyyy-MM-dd HH:mm')}"></td>
+                    </tr>
+                    <tr th:if="${#lists.isEmpty(noticeList)}">
+                        <td colspan="2" style="text-align: center;">공지사항이 없습니다.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- 글쓰기 버튼 (관리자만) -->
+        <div sec:authorize="hasRole('ROLE_ADMIN')" style="text-align: right; margin-top: 10px;">
+            <a th:href="@{/notice_write}" class="btn-primary">글쓰기</a>
+        </div>
+
+        <!-- 돌아가기 버튼 -->
+        <div class="btn-back-container">
+            <a th:href="@{/}" class="btn-back">돌아가기</a>
+        </div>
+    </main>
+
+    <footer th:replace="~{common:: footer}"></footer>
+</body>
+</html>

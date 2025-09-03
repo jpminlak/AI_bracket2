@@ -36,20 +36,16 @@
 
         .form-row span {
             padding: 10px;
-            /*border: 1px solid #eee;*/
             border-radius: 6px;
             font-size: 14px;
             color: #555;
             width: 85%;
             background-color: #f9f9f9;
-
-            /* 이메일과 전화번호의 길이가 다를 경우 높이가 어색해질 수 있으므로, 위의 공통 스타일에서 `min-height`와 `box-sizing`을 추가. */
-            min-height: 38px;   /* 이 부분에서 최소 높이를 지정하여 데이터 유무와 상관없이 높이를 고정. */
-            box-sizing: border-box; /* 패딩과 보더가 너비/높이에 포함되도록 설정 */
-            display: flex;  /* 내부 텍스트를 정렬하기 위해 flexbox를 사용 */
-            align-items: center;    /* 텍스트를 수직 중앙에 정렬 */
+            min-height: 38px;
+            box-sizing: border-box;
+            display: flex;
+            align-items: center;
         }
-
 
         .section {
             display: block;
@@ -62,35 +58,60 @@
             border-radius: 4px;
         }
 
-        .center-button-container {
-            text-align: center;
-            margin-top: 20px;
-        }
-
-        .center-button-container a {
+        /* 버튼 공통 스타일 */
+        .btn-primary,
+        .btn-secondary {
             padding: 12px 24px;
             border: none;
-            background: #0b0b1a;
-            color: white;
             font-size: 16px;
             font-weight: bold;
             border-radius: 6px;
             cursor: pointer;
             text-decoration: none;
             transition: 0.3s;
+        }
+
+        .btn-primary {
+            background: black;
+            color: white;
             width: 100%;
             display: block;
         }
 
-        .center-button-container a:hover {
+        .btn-primary:hover {
             background: #acabab;
             color: black;
         }
 
-        /*.center-button-container span{
-            text-align: center;
+        .btn-secondary {
+            background: black;
+            color: white;
+            font-size: 14px;
+        }
+
+        .btn-secondary:hover {
+            background: #acabab;
+            color: black;
+        }
+
+        /* 버튼 레이아웃 */
+        .row-btn {
+            width: 100%;
+            display: flex;
+            align-items: center;
             margin-top: 20px;
-        }*/
+        }
+
+        .center-row {
+            justify-content: center;
+            text-align: center;
+        }
+
+        .right-row {
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 10px;
+        }
     </style>
 </head>
 
@@ -107,7 +128,7 @@
                     <label>ID</label>
                     <span th:text="${#authentication.principal.member.memberId}"></span>
                     <label>이름</label>
-                    <span th:text="${#authentication.principal.member.username}"></span>
+                    <span th:text="${#authentication.principal.member.memberName}"></span>
                 </div>
                 <div class="form-row">
                     <label>성별</label>
@@ -142,11 +163,12 @@
                         th:text="${#temporals.format(#authentication.principal.member.uptDate, 'yyyy-MM-dd HH:mm:ss')}"></span>
                 </div>
 
-                <div class="center-button-container">
-                    <a th:href="@{/member/modify}">회원정보 수정</a>
+                <div class="row-btn center-row">
+                    <a th:href="@{/member/modify}" class="btn-primary">회원정보 수정</a>
                 </div>
-                <div class="center-button-container" style="width: 10%; float: right;">
-                    <a th:href="@{/member/withdrawal}">회원탈퇴</a>
+                <div class="row-btn right-row">
+                    <a th:href="@{/member/list}" class="btn-secondary" sec:authorize="hasRole('ROLE_ADMIN')">회원목록</a>
+                    <a th:href="@{/member/withdrawal}" class="btn-secondary">회원탈퇴</a>
                 </div>
             </div>
         </div>

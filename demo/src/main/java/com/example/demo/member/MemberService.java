@@ -2,6 +2,10 @@ package com.example.demo.member;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -21,7 +25,7 @@ public class MemberService {
     public Member create(MemberCreateForm memberCreateForm) {
         Member member = new Member();
         member.setMemberId(memberCreateForm.getMemberId());
-        member.setUsername(memberCreateForm.getUsername());
+        member.setMemberName(memberCreateForm.getMemberName());
         member.setPassword(passwordEncoder.encode(memberCreateForm.getPassword1()));
         member.setSex(memberCreateForm.getSex());
         member.setBirthday(memberCreateForm.getBirthday());
@@ -45,6 +49,12 @@ public class MemberService {
         }
     }
 
+    // 회원목록 메서드
+    public Page<Member> getList(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "regDate"));
+        return memberRepository.findAll(pageable);
+    }
+
     // 회원정보 수정 메서드
     @Transactional
     public Member modify(String memberId, MemberModifyForm memberModifyForm) {
@@ -52,7 +62,7 @@ public class MemberService {
                 .orElseThrow(() -> new RuntimeException("회원 없음"));
 
         // DTO의 값으로 엔티티를 업데이트
-        member.setUsername(memberModifyForm.getUsername());
+        member.setMemberName(memberModifyForm.getMemberName());
         member.setPassword(passwordEncoder.encode(memberModifyForm.getPassword1()));
         member.setSex(memberModifyForm.getSex());
         member.setBirthday(memberModifyForm.getBirthday());
@@ -98,5 +108,13 @@ public class MemberService {
                 throw new IllegalStateException("탈퇴한 계정으로는 재가입할 수 없습니다.");
             }
         }
+    }
+
+    public Optional<Member> findByMemberId(String memberId) {
+        return memberRepository.findByMemberId(memberId);
+    }
+
+    public Optional<Member> findByNum(Long num) {
+        return memberRepository.findById(num); // JPA 기본 제공
     }
 }

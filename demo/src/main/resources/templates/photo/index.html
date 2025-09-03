@@ -4,282 +4,342 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>음식 분석 & 추천 - 회원 가입</title>
+    <title>음식 분석기</title>
     <link rel="stylesheet" th:href="@{/main.css}">
+    <style>
+        .analyzer {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 16px;
+        }
+
+        .analyzer .container {
+            background-color: #fff;
+            padding: 32px;
+            border-radius: 24px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 500px;
+        }
+
+        .analyzer h1 {
+            text-align: center;
+            font-size: 2rem;
+            margin-bottom: 24px;
+        }
+
+        .analyzer #upload-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .analyzer input[type="file"] {
+            display: none;
+        }
+
+        .analyzer label {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            height: 180px;
+            border: 2px solid #3b82f6;
+            border-radius: 16px;
+            cursor: pointer;
+            margin-bottom: 16px;
+            transition: background-color 0.2s;
+        }
+
+        .analyzer label:hover {
+            background-color: #e0f2ff;
+        }
+
+        .analyzer #image-preview {
+            max-height: 256px;
+            border-radius: 16px;
+            margin-bottom: 16px;
+            display: none;
+        }
+
+        .analyzer button {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 16px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: opacity 0.2s;
+        }
+
+        .analyzer #analyze-button {
+            background-color: #3b82f6;
+            color: #fff;
+        }
+
+        .analyzer #analyze-button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .analyzer #reset-button {
+            background-color: #d1d5db;
+        }
+
+        .analyzer #save-button {
+            background-color: #22c55e;
+            color: #fff;
+        }
+
+        .analyzer .loading-spinner {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            border-top: 4px solid #3b82f6;
+            border-radius: 50%;
+            width: 48px;
+            height: 48px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .analyzer #loading {
+            display: none;
+            margin-top: 24px;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .analyzer #error-message {
+            color: red;
+            margin-top: 24px;
+            display: none;
+            text-align: center;
+        }
+
+        .analyzer #results-container {
+            display: none;
+            margin-top: 32px;
+        }
+
+        .analyzer #results-container img {
+            width: 100%;
+            border-radius: 16px;
+            margin-bottom: 16px;
+        }
+
+        .analyzer #results-container p {
+            margin: 4px 0;
+        }
+
+        .analyzer select {
+            width: 100%;
+            padding: 8px;
+            border-radius: 8px;
+            margin-bottom: 16px;
+        }
+
+        .analyzer .button-group {
+            display: flex;
+            gap: 8px;
+            margin-top: 16px;
+        }
+    </style>
 </head>
 
 <body>
     <header th:replace="~{common:: header}"></header>
-    <main class="main">
-        <section class="analysis-section">
-            <h1>AI 음식 사진 분석</h1>
-            <p>AI가 음식 종류와 영양 정보를 분석...</p>
 
-            <!-- 파일 업로드 박스 -->
-            <!-- 업로드 폼 -->
-            <form action="/api/food/upload" method="post" enctype="multipart/form-data">
-                <div class="upload-box">
-                    <label for="file-upload" class="upload-label">
-                        📤 음식 사진 업로드
-                    </label>
-                    <!-- 반드시 name="file" 필요 -->
-                    <input id="file-upload" name="file" type="file" accept="image/*" />
+    <main>
+        <div class="analyzer">
+            <div class="container">
+                <!-- ✅ CSRF 토큰 hidden input -->
+                <input type="hidden" id="csrfToken" th:value="${_csrf.token}" />
+                <input type="hidden" id="csrfHeader" th:value="${_csrf.headerName}" />
 
-                    <p class="upload-subtext">JPG, PNG 파일을 선택하거나 여기로 드래그하여 업로드</p>
-                    <p class="upload-tip">💡 팁: 음식이 선명하게 보이는 사진일수록 더 정확한 분석이 가능합니다</p>
+                <h1>음식 분석기</h1>
+
+                <div id="upload-section">
+                    <input id="file-upload" type="file" accept="image/*">
+                    <label for="file-upload">이미지 선택</label>
+                    <img id="image-preview" />
+                    <button id="analyze-button">분석하기</button>
                 </div>
-                <button type="submit">업로드 & 분석하기</button>
-            </form>
-        </section>
+
+                <div id="loading">
+                    <div class="loading-spinner"></div>
+                    <span style="margin-left: 16px;">분석 중...</span>
+                </div>
+
+                <div id="error-message"></div>
+
+                <div id="results-container">
+                    <h2>분석 결과</h2>
+                    <img id="result-image" />
+                    <p>예상 음식: <span id="predicted-food"></span></p>
+                    <p>신뢰도: <span id="confidence"></span></p>
+                    <p>칼로리: <span id="energy"></span></p>
+                    <p>탄수화물: <span id="carbohydrate"></span></p>
+                    <p>단백질: <span id="protein"></span></p>
+                    <p>지방: <span id="fat"></span></p>
+
+                    <select id="mealTime" name="mealTime">
+                        <option value="">식사시간을 선택해주세요.</option>
+                        <option value="breakfast">아침</option>
+                        <option value="lunch">점심</option>
+                        <option value="dinner">저녁</option>
+                    </select>
+
+                    <div class="button-group">
+                        <button id="reset-button">다시 분석</button>
+                        <button id="save-button">음식 저장</button>
+                    </div>
+                </div>
+            </div>
+        </div>
     </main>
+
     <footer th:replace="~{common:: footer}"></footer>
 </body>
 
-</html>
-
 <script>
-    document.getElementById("file-upload").addEventListener("change", async (event) => {
-        const file = event.target.files[0];
-        if (!file) return;
+    document.addEventListener('DOMContentLoaded', () => {
+        const fileInput = document.getElementById('file-upload');
+        const imagePreview = document.getElementById('image-preview');
+        const uploadSection = document.getElementById('upload-section');
+        const analyzeButton = document.getElementById('analyze-button');
+        const loading = document.getElementById('loading');
+        const resultsContainer = document.getElementById('results-container');
+        const resultImage = document.getElementById('result-image');
+        const errorMessage = document.getElementById('error-message');
+        const resetButton = document.getElementById('reset-button');
+        const saveButton = document.getElementById('save-button');
+        const mealTimeSelect = document.getElementById('mealTime');
 
-        const formData = new FormData();
-        formData.append("file", file); // name="file" 과 동일해야 함
+        const csrfToken = document.getElementById('csrfToken').value;
+        const csrfHeader = document.getElementById('csrfHeader').value;
 
-        const response = await fetch("/api/food/upload", {
-            method: "POST",
-            body: formData
+        const predictedFoodElem = document.getElementById('predicted-food');
+        const confidenceElem = document.getElementById('confidence');
+        const energyElem = document.getElementById('energy');
+        const carbohydrateElem = document.getElementById('carbohydrate');
+        const proteinElem = document.getElementById('protein');
+        const fatElem = document.getElementById('fat');
+
+        let uploadedFile = null;
+        let uploadedFileUrl = null;
+        const API_URL = 'http://localhost:8000/upload';
+
+        // 이미지 업로드
+        fileInput.addEventListener('change', e => {
+            uploadedFile = e.target.files[0];
+            if (uploadedFile) {
+                const reader = new FileReader();
+                reader.onload = e => {
+                    uploadedFileUrl = e.target.result;
+                    imagePreview.src = uploadedFileUrl;
+                    imagePreview.style.display = 'block';
+                };
+                reader.readAsDataURL(uploadedFile);
+            }
+            resultsContainer.style.display = 'none';
+            errorMessage.style.display = 'none';
         });
 
-        if (response.ok) {
-            alert("업로드 성공!");
-        } else {
-            alert("업로드 실패...");
+        // 분석하기 버튼
+        analyzeButton.addEventListener('click', async () => {
+            if (!uploadedFile) {
+                errorMessage.textContent = '이미지를 먼저 업로드해주세요';
+                errorMessage.style.display = 'block';
+                return;
+            }
+
+            analyzeButton.disabled = true;
+            loading.style.display = 'flex';
+            resultsContainer.style.display = 'none';
+            errorMessage.style.display = 'none';
+
+            const formData = new FormData();
+            formData.append('file', uploadedFile);
+
+            try {
+                const response = await fetch(API_URL, { method: 'POST', body: formData });
+                if (!response.ok) throw new Error(`HTTP 오류 ${response.status}`);
+                const data = await response.json();
+                showResults(data.food_name, data.confidence, data.nutrition_info, uploadedFileUrl);
+            } catch (e) {
+                console.error(e);
+                errorMessage.textContent = `분석 실패: ${e.message}`;
+                errorMessage.style.display = 'block';
+            } finally {
+                analyzeButton.disabled = false;
+                loading.style.display = 'none';
+            }
+        });
+
+        // 다시 분석 버튼
+        resetButton.addEventListener('click', () => {
+            resultsContainer.style.display = 'none';
+            uploadSection.style.display = 'flex';
+            fileInput.value = '';
+            imagePreview.src = '#';
+            imagePreview.style.display = 'none';
+            uploadedFile = null;
+            uploadedFileUrl = null;
+        });
+
+        // 음식 저장 버튼
+        saveButton.addEventListener('click', async () => {
+            const foodData = {
+                foodName: predictedFoodElem.textContent,
+                calories: parseFloat(energyElem.textContent) || null,
+                protein: parseFloat(proteinElem.textContent) || null,
+                fat: parseFloat(fatElem.textContent) || null,
+                carbohydrates: parseFloat(carbohydrateElem.textContent) || null,
+                mealTime: mealTimeSelect.value || null
+            };
+
+            try {
+                const response = await fetch('/photo/save', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        [csrfHeader]: csrfToken
+                    },
+                    body: JSON.stringify(foodData)
+                });
+
+                if (!response.ok) throw new Error(`저장 실패: ${response.status}`);
+                alert('저장되었습니다!');
+                window.location.href = '/diet';
+            } catch (e) {
+                console.error(e);
+                alert(`저장 실패: ${e.message}`);
+            }
+        });
+
+        // 결과 표시
+        function showResults(food, confidence, nutrition, imageSrc) {
+            resultImage.src = imageSrc;
+            predictedFoodElem.textContent = food;
+            confidenceElem.textContent = confidence ? `${(confidence * 100).toFixed(2)}%` : 'N/A';
+            const safeNutrition = nutrition || {};
+            energyElem.textContent = safeNutrition.calories ?? 'N/A';
+            carbohydrateElem.textContent = safeNutrition.carbohydrates ?? 'N/A';
+            proteinElem.textContent = safeNutrition.protein ?? 'N/A';
+            fatElem.textContent = safeNutrition.fat ?? 'N/A';
+            resultsContainer.style.display = 'block';
+            uploadSection.style.display = 'none';
         }
     });
 </script>
-<style>
-    body,
-    h1,
-    h2,
-    h3,
-    p,
-    ul,
-    li,
-    a {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-    }
 
-    body {
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        background-color: #f4f7f9;
-        color: #333;
-        line-height: 1.6;
-    }
-
-    a {
-        text-decoration: none;
-        color: inherit;
-    }
-
-    ul {
-        list-style: none;
-    }
-
-    /* 헤더 */
-    .header {
-        background-color: #fff;
-        border-bottom: 1px solid #e0e0e0;
-        padding: 1rem 2rem;
-    }
-
-    .header-inner {
-        max-width: 1200px;
-        margin: 0 auto;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-    }
-
-    .logo a {
-        font-weight: bold;
-        font-size: 1.2rem;
-        color: #555;
-    }
-
-    .nav ul {
-        display: flex;
-        gap: 1.5rem;
-    }
-
-    .nav a {
-        padding: 0.5rem 0.5rem;
-        font-size: 0.9rem;
-        color: #555;
-        transition: color 0.3s;
-    }
-
-    .nav a:hover,
-    .nav a.active {
-        color: #2c3e50;
-        border-bottom: 2px solid #3498db;
-    }
-
-    .user-info a {
-        font-size: 0.8rem;
-        color: #888;
-        margin-left: 1rem;
-    }
-
-    /* 메인 컨텐츠 */
-    .main {
-        padding: 2rem 2rem;
-        min-height: calc(100vh - 200px);
-        /* 푸터 고려 */
-        display: flex;
-        justify-content: center;
-        align-items: flex-start;
-    }
-
-    .analysis-section {
-        width: 100%;
-        max-width: 800px;
-        text-align: center;
-    }
-
-    .section-title {
-        font-size: 2rem;
-        font-weight: bold;
-        margin-bottom: 0.5rem;
-        color: #2c3e50;
-    }
-
-    .section-description {
-        color: #7f8c8d;
-        margin-bottom: 2rem;
-    }
-
-    .upload-box {
-        border: 2px dashed #bdc3c7;
-        background-color: #ecf0f1;
-        border-radius: 12px;
-        padding: 4rem 2rem;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        text-align: center;
-        gap: 1rem;
-        color: #888;
-    }
-
-    .upload-icon {
-        display: flex;
-        gap: 1.5rem;
-    }
-
-    .upload-text {
-        font-size: 1.2rem;
-        font-weight: bold;
-    }
-
-    .upload-subtext {
-        font-size: 0.9rem;
-        color: #95a5a6;
-    }
-
-    .upload-tip {
-        font-size: 0.8rem;
-        color: #3498db;
-        background-color: #eaf6fc;
-        border-radius: 50px;
-        padding: 0.4rem 1rem;
-        margin-top: 1rem;
-        font-weight: bold;
-    }
-
-    /* 푸터 */
-    .footer {
-        background-color: #2c3e50;
-        color: #bdc3c7;
-        padding: 2rem 2rem 1rem;
-        font-size: 0.9rem;
-        border-top: 1px solid #34495e;
-    }
-
-    .footer-inner {
-        max-width: 1200px;
-        margin: 0 auto 2rem;
-        display: flex;
-        justify-content: space-between;
-        gap: 2rem;
-        flex-wrap: wrap;
-    }
-
-    .footer-col {
-        flex: 1;
-        min-width: 150px;
-    }
-
-    .footer-col p {
-        font-weight: bold;
-        color: #ecf0f1;
-        margin-bottom: 1rem;
-    }
-
-    .footer-col ul {
-        display: flex;
-        flex-direction: column;
-        gap: 0.5rem;
-    }
-
-    .contact p {
-        font-weight: normal;
-        margin-bottom: 0.5rem;
-    }
-
-    .copyright {
-        text-align: center;
-        color: #7f8c8d;
-        font-size: 0.8rem;
-        margin-top: 1rem;
-    }
-
-    /* 모바일 반응형 */
-    @media screen and (max-width: 768px) {
-        .header-inner {
-            flex-direction: column;
-            text-align: center;
-            gap: 1rem;
-        }
-
-        .nav ul {
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 1rem;
-        }
-
-        .user-info {
-            margin-top: 0.5rem;
-        }
-
-        .main {
-            padding: 1rem;
-        }
-
-        .upload-box {
-            padding: 2rem 1rem;
-        }
-
-        .footer-inner {
-            flex-direction: column;
-            text-align: center;
-            gap: 1rem;
-        }
-
-        .footer-col {
-            min-width: unset;
-        }
-    }
-</style>
+</html>

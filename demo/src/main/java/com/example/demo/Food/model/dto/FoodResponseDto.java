@@ -1,23 +1,19 @@
-package com.example.demo.Food.model.dto;
+package com.example.demo.food.model.dto;
 
-
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@Getter
+@Setter
 public class FoodResponseDto {
-    private String name;
-    private Integer confidenceScore;
-    private String servingSize;
-    private Integer calories;
-    private Integer carbohydrates;
-    private Integer protein;
-    private Integer fat;
-    private String analysisDetails;
-    private String imageUrl;
+    private String name;             // 음식 이름
+    private Integer confidenceScore; // 신뢰도 (%)
+    private Double calories;
+    private Double protein;
+    private Double fat;
+    private Double carbohydrates;
+    private String analysisDetails;  // 분석 상세 (출처 표시 등)
 }

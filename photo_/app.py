@@ -14,8 +14,8 @@ import pandas as pd
 # =========================================================
 # ⚠️ 실제 파일 경로에 맞게 수정해야 합니다.
 # 예시: 'model/foodim4.keras'와 'dataset/food.csv'
-MODEL_PATH = "model/foodim9.keras"
-NUTRITION_DB_PATH = "dataset/food.csv"
+MODEL_PATH = "photo_/model/foodim9.keras"
+NUTRITION_DB_PATH = "photo_/dataset/food.csv"
 
 try:
     if not os.path.exists(MODEL_PATH):

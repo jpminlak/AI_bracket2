@@ -1,4 +1,4 @@
-package com.example.demo.Food.model;
+package com.example.demo.food.model;
 
 import jakarta.persistence.*;
 import lombok.*;
@@ -12,36 +12,22 @@ import lombok.*;
 public class Food {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Long Id;
 
-    // 식품명
-    @Column(name = "food_name", nullable = false)
+    //음식 이름
     private String foodName;
 
-    // 에너지(kcal)
-    @Column(name = "calories")
-    private Double calories;
+    //음식 칼로리
+    private Integer foodCalories;
+    //음식 탄수화물
+    private Integer foodCarbohydrates;
+    //음식 단백질
+    private Integer foodProtein;
+    //음식 지방
+    private Integer foodFat;
+    //음식에 대한 설명
+    private String foodDescription;
 
-    // 단백질(g)
-    @Column(name = "protein")
-    private Double protein;
-
-    // 지방(g)
-    @Column(name = "fat")
-    private Double fat;
-
-    // 탄수화물(g)
-    @Column(name = "carbohydrates")
-    private Double carbohydrates;
-
-    // 나트륨(mg)
-    @Column(name = "sodium")
-    private Double sodium;
-
-    // 기타 필요한 필드 추가
-    @Column(name = "moisture")
-    private Double moisture;
-
-    @Column(name = "dietary_fiber")
-    private Double dietaryFiber;
+    //업로드하면 저장되는 경로
+    private String imagePath;
 }

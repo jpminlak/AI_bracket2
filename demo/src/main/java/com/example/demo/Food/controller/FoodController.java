@@ -1,34 +1,28 @@
-package com.example.demo.Food.controller;
+package com.example.demo.food.controller;
 
 import com.example.demo.food.model.dto.FoodResponseDto;
-import com.example.demo.Food.Service.FoodService;
+import com.example.demo.food.Service.FoodService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-@RestController
-@RequestMapping("/photo")
+@Controller     // @Restcontroller를 쓰면 return에 쓴 문장이 그대로 출력된다. 그냥 @Controller를 써야 html 문서 렌더링.
+@RequestMapping("/photo")    // URL 단순화
 @RequiredArgsConstructor
 public class FoodController {
 
     private final FoodService foodService;
 
     @GetMapping
-    public String status() {
-        return "Food API is running";
+    public String uploadPhoto(){
+        return "/photo/index";
     }
 
     @PostMapping("/upload")
-    public ResponseEntity<FoodResponseDto> uploadFood(@RequestPart("foodFile") MultipartFile file) {
-        try {
-            return ResponseEntity.ok(foodService.analyzeFood(file));
-        } catch (Exception e) {
-            return ResponseEntity.badRequest()
-                    .body(FoodResponseDto.builder()
-                            .analysisDetails("이미지 분석 실패: " + e.getMessage())
-                            .build());
-        }
+    public ResponseEntity<FoodResponseDto> uploadFoodImage(@RequestPart("foodFile") MultipartFile file) throws Exception {
+        FoodResponseDto response = foodService.analyzeFood(file);
+        return ResponseEntity.ok(response);
     }
 }

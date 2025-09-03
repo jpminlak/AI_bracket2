@@ -1,7 +1,6 @@
-package com.example.demo.Food.Service;
+package com.example.demo.food.Service;
 
 import com.example.demo.food.model.dto.FoodResponseDto;
-import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
@@ -12,64 +11,63 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Collections;
 import java.util.Map;
 
 
 @Service
-@RequiredArgsConstructor
 public class FoodService {
 
     private final RestTemplate restTemplate = new RestTemplate();
-    private final String fastApiUrl = "http://localhost:8000/upload"; // FastAPI URL
+    // FastAPI 서버의 정확한 URL과 엔드포인트를 지정합니다.
+    private final String fastApiUrl = "http://localhost:8000/analyze-image/";
 
     public FoodResponseDto analyzeFood(MultipartFile file) throws IOException {
+        // HTTP 요청 헤더 설정
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.MULTIPART_FORM_DATA);
+
+        // MultipartFile을 File로 변환하여 요청 본문에 추가
+        MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
         File tempFile = convertMultipartFileToFile(file);
-        try {
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.MULTIPART_FORM_DATA);
+        body.add("file", new FileSystemResource(tempFile));
 
-            MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
-            body.add("file", new FileSystemResource(tempFile));
+        HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
 
-            HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
-            ResponseEntity<Map> response = restTemplate.postForEntity(fastApiUrl, requestEntity, Map.class);
+        // FastAPI 호출 및 응답 받기
+        ResponseEntity<Map> response = restTemplate.postForEntity(fastApiUrl, requestEntity, Map.class);
+        Map<String, Object> result = response.getBody();
 
-            Map<String, Object> result = response.getBody();
-            if (result == null) throw new IOException("FastAPI에서 응답이 없습니다.");
-
-            // FastAPI JSON key 기준
-            String foodName = (String) result.get("food_name");
-            Double confidence = result.get("confidence") instanceof Number ? ((Number) result.get("confidence")).doubleValue() : null;
-
-            Map<String, Object> nutrition = result.get("nutrition_info") instanceof Map ?
-                    (Map<String, Object>) result.get("nutrition_info") : Collections.emptyMap();
-
-            Double calories = nutrition.get("calories") instanceof Number ? ((Number) nutrition.get("calories")).doubleValue() : null;
-            Double protein = nutrition.get("protein") instanceof Number ? ((Number) nutrition.get("protein")).doubleValue() : null;
-            Double fat = nutrition.get("fat") instanceof Number ? ((Number) nutrition.get("fat")).doubleValue() : null;
-            Double carbohydrates = nutrition.get("carbohydrates") instanceof Number ? ((Number) nutrition.get("carbohydrates")).doubleValue() : null;
-
-            return FoodResponseDto.builder()
-                    .name(foodName)
-                    .confidenceScore(confidence != null ? (int) (confidence * 100) : null)
-                    .calories(calories)
-                    .protein(protein)
-                    .fat(fat)
-                    .carbohydrates(carbohydrates)
-                    .analysisDetails("FastAPI 모델 예측 결과")
-                    .build();
-
-        } finally {
-            if (tempFile.exists()) tempFile.delete();
+        // 임시 파일 삭제
+        if (tempFile.exists()) {
+            tempFile.delete();
         }
+
+        // FastAPI 응답에서 데이터 추출 (key 값은 FastAPI에서 반환하는 JSON key와 일치해야 합니다.)
+        String foodName = (String) result.get("food_name");
+        Double confidence = (Double) result.get("confidence");
+        Integer calories = (Integer) result.get("calories");
+        Integer carbohydrates = (Integer) result.get("carbohydrates");
+        Integer protein = (Integer) result.get("protein");
+        Integer fat = (Integer) result.get("fat");
+
+        // DTO에 담아 클라이언트에 반환할 데이터 생성
+        return FoodResponseDto.builder()
+                .name(foodName)
+                .confidenceScore((int) (confidence * 100))
+                .servingSize("1 serving") // 더미 값 또는 실제 데이터
+                .calories(calories)
+                .carbohydrates(carbohydrates)
+                .protein(protein)
+                .fat(fat)
+                .analysisDetails("FastAPI 모델이 예측한 결과입니다.")
+                .build();
     }
 
+    /**
+     * MultipartFile을 임시 File로 변환하는 헬퍼 메서드.
+     */
     private File convertMultipartFileToFile(MultipartFile file) throws IOException {
-        String[] nameParts = file.getOriginalFilename().split("\\.");
-        String prefix = nameParts[0];
-        String suffix = nameParts.length > 1 ? "." + nameParts[1] : null;
-        File tempFile = File.createTempFile(prefix, suffix);
+        File tempFile = File.createTempFile(file.getOriginalFilename(), "");
         file.transferTo(tempFile);
         return tempFile;
     }

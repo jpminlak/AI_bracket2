@@ -2,6 +2,7 @@ package com.example.demo.Food.model;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.springframework.web.multipart.MultipartFile;
 
 
 @Entity
@@ -35,14 +36,8 @@ public class Food {
     @Column(name = "carbohydrates")
     private Double carbohydrates;
 
-    // 나트륨(mg)
-    @Column(name = "sodium")
-    private Double sodium;
 
-    // 기타 필요한 필드 추가
-    @Column(name = "moisture")
-    private Double moisture;
-
-    @Column(name = "dietary_fiber")
-    private Double dietaryFiber;
+    @Column(name = "image_data")
+    @Lob
+    private byte[] imageData;
 }

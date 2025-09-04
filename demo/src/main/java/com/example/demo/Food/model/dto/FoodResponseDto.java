@@ -6,8 +6,6 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@Getter
-@Setter
 public class FoodResponseDto {
     private String name;             // 음식 이름
     private Integer confidenceScore; // 신뢰도 (%)

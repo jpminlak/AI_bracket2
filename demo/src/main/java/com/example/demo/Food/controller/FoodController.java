@@ -8,7 +8,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-@RestController
+@Controller
 @RequestMapping("/photo")
 @RequiredArgsConstructor
 public class FoodController {
@@ -16,14 +16,17 @@ public class FoodController {
     private final FoodService foodService;
 
     @GetMapping
-    public String status() {
-        return "Food API is running";
+    public String uploadPhotoPage() {
+        return "/photo/index"; // templates/photo/index.html 렌더링
     }
 
     @PostMapping("/upload")
+    @ResponseBody
     public ResponseEntity<FoodResponseDto> uploadFood(@RequestPart("foodFile") MultipartFile file) {
         try {
-            return ResponseEntity.ok(foodService.analyzeFood(file));
+            // 분석 + DB 저장
+            FoodResponseDto dto = foodService.analyzeFood(file);
+            return ResponseEntity.ok(dto);
         } catch (Exception e) {
             return ResponseEntity.badRequest()
                     .body(FoodResponseDto.builder()

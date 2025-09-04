@@ -3,132 +3,681 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>음식 분석기</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        .hidden { display: none; }
-        .loading-spinner { border: 4px solid rgba(0,0,0,0.1); border-top: 4px solid #3b82f6; border-radius: 50%; width: 3rem; height: 3rem; animation: spin 1s linear infinite; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-    </style>
+    <title>AI 음식 사진 분석</title>
+    <link rel="stylesheet" href="styles.css">
 </head>
-<body class="bg-gray-100 min-h-screen flex items-center justify-center p-4">
-<div class="container bg-white p-8 rounded-2xl shadow-lg w-full">
-    <h1 class="text-3xl font-bold text-center mb-6">음식 분석기</h1>
+<body>
+<div class="container">
+    <header class="header">
+        <h1>AI 음식 사진 분석</h1>
+        <p class="subtitle">음식 사진을 업로드하면 AI가 음식 종류와 영양 정보를 자동으로 분석해드립니다.</p>
+    </header>
 
-    <div id="upload-section">
-        <input id="file-upload" type="file" class="hidden" accept="image/*">
-        <label for="file-upload" class="cursor-pointer w-full mb-4 flex justify-center items-center h-48 border-2 border-blue-500 rounded-xl hover:bg-blue-50">이미지 선택</label>
-        <img id="image-preview" class="hidden max-h-64 rounded-xl" />
-        <button id="analyze-button" class="w-full bg-blue-600 text-white py-3 rounded-xl mt-4">분석하기</button>
+    <div id="upload-screen" class="screen active">
+        <div class="upload-area">
+            <div class="upload-icons">
+                <svg class="upload-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                    <polyline points="7,10 12,15 17,10"/>
+                    <line x1="12" y1="15" x2="12" y2="3"/>
+                </svg>
+                <svg class="camera-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+                    <circle cx="12" cy="13" r="4"/>
+                </svg>
+            </div>
+            <h2>음식 사진을 업로드하세요</h2>
+            <button class="upload-btn" onclick="document.getElementById('file-upload').click()">
+                <p>JPG, PNG 파일을 선택하거나 여기로 드래그하여 업로드</p>
+                <div class="tip">
+                    <span class="tip-icon">💡</span>
+                    <span>팁: 음식이 선명하게 보이는 사진일수록 더 정확한 분석이 가능합니다</span>
+                </div>
+                <input type="file" id="file-upload" accept="image/*" hidden>
+            </button>
+        </div>
+        <div id="loading" style="display: none; text-align: center; margin-top: 20px;">
+            <p>분석 중입니다...</p>
+            <p style="font-size: 0.9em; color: #555;">
+                <span id="loading-step-food" style="display: block;">🍽️ 음식 종류 인식 중...</span>
+                <span id="loading-step-nutrient" style="display: block;">📊 영양 성분 분석 중...</span>
+                <span id="loading-step-estimate" style="display: block;">⬇️ 섭취량 추정 중...</span>
+            </p>
+        </div>
+        <p id="error-message" style="color: red; text-align: center; margin-top: 20px; display: none;"></p>
     </div>
 
-    <div id="loading" class="flex justify-center items-center mt-6 hidden">
-        <div class="loading-spinner"></div><span class="ml-4">분석 중...</span>
-    </div>
-    <div id="error-message" class="text-red-500 mt-6 hidden"></div>
+    <div id="results-container" class="screen">
+        <div class="result-content">
+            <div class="result-header">
+                <span class="success-icon">✅</span>
+                <h2>분석 완료!</h2>
+            </div>
+            <div class="food-info-card">
+                <div class="food-category">인식된 음식</div>
+                <h3 id="predicted-food" class="food-name"></h3>
+                <img id="result-image" src="" alt="분석 결과 이미지" style="max-width: 100%; height: auto; border-radius: 15px; display: none;">
+                <div class="serving-info">
+                    <span>추정 섭취량: 1인분 (약 250g)</span>
+                </div>
+                <div class="confidence">
+                    <span>분석 신뢰도: <strong id="confidence"></strong></span>
+                </div>
+            </div>
+            <div class="nutrition-grid">
+                <div class="nutrition-card calories">
+                    <div class="nutrition-icon">🔥</div>
+                    <div class="nutrition-label">칼로리</div>
+                    <div id="energy" class="nutrition-value"></div>
+                    <div class="nutrition-unit">kcal</div>
+                </div>
+                <div class="nutrition-card carbs">
+                    <div class="nutrition-icon">⚪</div>
+                    <div class="nutrition-label">탄수화물</div>
+                    <div id="carbohydrate" class="nutrition-value"></div>
+                    <div class="nutrition-unit">g</div>
+                </div>
+                <div class="nutrition-card protein">
+                    <div class="nutrition-icon">🥩</div>
+                    <div class="nutrition-label">단백질</div>
+                    <div id="protein" class="nutrition-value"></div>
+                    <div class="nutrition-unit">g</div>
+                </div>
+                <div class="nutrition-card fat">
+                    <div class="nutrition-icon">🧈</div>
+                    <div class="nutrition-label">지방</div>
+                    <div id="fat" class="nutrition-value"></div>
+                    <div class="nutrition-unit">g</div>
+                </div>
+            </div>
+            <div class="analysis-details">
+                <div class="details-header">
+                    <span class="bulb-icon">💡</span>
+                    <h4>영양 분석 결과</h4>
+                </div>
+                <p>
+                    분석 결과는 음식의 종류, 양, 조리법에 따라 달라질 수 있습니다.
+                    정확한 영양 정보는 전문적인 식단 관리 도구를 활용하시는 것을 권장합니다.
+                </p>
+            </div>
+            <div class="action-buttons">
+                <button id="reset-button" class="new-analysis-btn">🔄 새로운 분석 시작</button>
+                <button class="add-to-meal-btn">📝 식단에 추가</button>
+            </div>
+        </div>
 
-    <div id="results-container" class="mt-8 hidden">
-        <h2 class="text-2xl mb-4">분석 결과</h2>
-        <img id="result-image" class="w-full h-auto rounded-xl mb-4" />
-        <p>예상 음식: <span id="predicted-food"></span></p>
-        <p>신뢰도: <span id="confidence"></span></p>
-        <p>칼로리: <span id="energy"></span></p>
-        <p>탄수화물: <span id="carbohydrate"></span></p>
-        <p>단백질: <span id="protein"></span></p>
-        <p>지방: <span id="fat"></span></p>
-        <button id="reset-button" class="mt-4 bg-gray-300 py-2 px-4 rounded-xl">다시 분석</button>
     </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // 모든 화면 요소와 버튼을 가져옵니다.
+            const uploadScreen = document.getElementById('upload-screen');
+            const resultsContainer = document.getElementById('results-container');
+            const fileInput = document.getElementById('file-upload');
+            const loading = document.getElementById('loading');
+            const resultImage = document.getElementById('result-image');
+            const errorMessage = document.getElementById('error-message');
+            const resetButton = document.getElementById('reset-button');
+
+            // 동적 데이터를 위한 요소들을 가져옵니다.
+            const predictedFoodElem = document.getElementById('predicted-food');
+            const confidenceElem = document.getElementById('confidence');
+            const energyElem = document.getElementById('energy');
+            const carbohydrateElem = document.getElementById('carbohydrate');
+            const proteinElem = document.getElementById('protein');
+            const fatElem = document.getElementById('fat');
+
+            let uploadedFile = null;
+            let uploadedFileUrl = null;
+            const API_URL = 'http://localhost:8000/upload';
+
+            // 화면 전환을 담당하는 함수
+            const showScreen = (screenToShow) => {
+                uploadScreen.style.display = 'none';
+                resultsContainer.style.display = 'none';
+                screenToShow.style.display = 'block';
+            };
+
+            // 분석 로직을 함수로 분리하여 재사용성을 높입니다.
+            async function startAnalysis() {
+                if (!uploadedFile) {
+                    errorMessage.textContent = '이미지를 먼저 업로드해주세요';
+                    errorMessage.style.display = 'block';
+                    return;
+                }
+
+                loading.style.display = 'flex';
+                errorMessage.style.display = 'none';
+                showScreen(uploadScreen); // 로딩 화면이 'upload-screen' 내부에 있으므로 이 화면을 보여줍니다.
+
+                const formData = new FormData();
+                formData.append('foodFile', uploadedFile);
+
+                try {
+                    const response = await fetch(API_URL, { method: 'POST', body: formData });
+                    if (!response.ok) throw new Error(`HTTP 오류 ${response.status}`);
+                    const data = await response.json();
+
+                    showResults(data.food_name, data.confidence, data.nutrition_info, uploadedFileUrl);
+
+                } catch (e) {
+                    console.error(e);
+                    errorMessage.textContent = `분석 실패: ${e.message}`;
+                    errorMessage.style.display = 'block';
+
+                } finally {
+                    loading.style.display = 'none';
+                }
+            }
+
+            // 파일 입력(input) 변경 이벤트 리스너: 파일 선택 시 즉시 분석 시작
+            fileInput.addEventListener('change', e => {
+                uploadedFile = e.target.files[0];
+                if (uploadedFile) {
+                    const reader = new FileReader();
+                    reader.onload = e => {
+                        uploadedFileUrl = e.target.result;
+                        // 이미지 프리뷰는 분석 결과 화면에서 보여주므로 여기서 따로 표시하지 않습니다.
+                        // 만약 업로드 후 분석 전 화면이 필요하다면 별도로 로직을 추가해야 합니다.
+                        startAnalysis();
+                    };
+                    reader.readAsDataURL(uploadedFile);
+                }
+            });
+
+            // '새로운 분석 시작' 버튼에 대한 이벤트 리스너
+            resetButton.addEventListener('click', () => {
+                fileInput.value = ''; // input 파일 초기화
+                uploadedFile = null;
+                uploadedFileUrl = null;
+                showScreen(uploadScreen);
+                errorMessage.style.display = 'none';
+            });
+
+            function showResults(food, confidence, nutrition, imageSrc) {
+                resultImage.src = imageSrc;
+                resultImage.style.display = 'block'; // 결과를 보여줄 때 이미지도 같이 보이게 합니다.
+
+                predictedFoodElem.textContent = food;
+                confidenceElem.textContent = confidence ? `${(confidence * 100).toFixed(2)}%` : 'N/A';
+                const safeNutrition = nutrition || {};
+                energyElem.textContent = safeNutrition.calories ?? 'N/A';
+                carbohydrateElem.textContent = safeNutrition.carbohydrates ?? 'N/A';
+                proteinElem.textContent = safeNutrition.protein ?? 'N/A';
+                fatElem.textContent = safeNutrition.fat ?? 'N/A';
+
+                showScreen(resultsContainer);
+            }
+        });
+    </script>
+
+    <style>
+        * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        min-height: 100vh;
+        background-color: #fff;
+        line-height: 1.6;
+    }
+
+    .container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+
+
+    .header {
+        text-align: center;
+        margin-bottom: 40px;
+        padding: 40px 0;
+    }
+
+    .header h1 {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: #2c3e50;
+        margin-bottom: 10px;
+    }
+
+    .subtitle {
+        font-size: 1.1rem;
+        color: #7f8c8d;
+        max-width: 600px;
+        margin: 0 auto;
+    }
+
+    .screen {
+        display: none;
+        animation: fadeIn 0.5s ease-in-out;
+    }
+
+    .screen.active {
+        display: block;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    .food-info-card {
+        /* 기존 스타일 */
+        background: linear-gradient(135deg, #e8f5e8 0%, #f0f8f0 100%);
+        border-radius: 15px;
+        padding: 30px;
+        margin-bottom: 30px;
+
+        /* 이 줄을 추가하여 이미지를 가운데로 정렬합니다. */
+        text-align: center;
+    }
+    /* �낅줈�� �붾㈃ */
+    .upload-area {
+        background: white;
+        border: 2px dashed #bdc3c7;
+        border-radius: 20px;
+        padding: 60px 40px;
+        text-align: center;
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+
+    .upload-area:hover {
+        border-color: #white;S
+        background: #f8f9fa;
+    }
+
+    .upload-icons {
+        display: flex;
+        justify-content: center;
+        gap: 20px;
+        margin-bottom: 30px;
+    }
+
+    .upload-icon, .camera-icon {
+        width: 60px;
+        height: 60px;
+        color: #95a5a6;
+    }
+
+    .upload-area h2 {
+        font-size: 1.8rem;
+        color: #2c3e50;
+        margin-bottom: 10px;
+    }
+
+    .upload-area p {
+        color: #7f8c8d;
+        margin-bottom: 30px;
+    }
+
+    .tip {
+        background: #e3f2fd;
+        border-radius: 10px;
+        padding: 15px;
+        margin: 20px 0;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        color: #1976d2;
+    }
+
+    .tip-icon {
+        font-size: 1.2rem;
+    }
+
+    .upload-btn {
+        background: #fff;
+        border: none;
+        padding: 15px 30px;
+        border-radius: 10px;
+        font-size: 1.1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+
+
+    /* �낅줈�� �꾨즺 �붾㈃ */
+    .uploaded-content {
+        background: #fff;
+        border-radius: 20px;
+        padding: 40px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    }
+
+    .uploaded-header {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 15px;
+        margin-bottom: 30px;
+    }
+
+    .fork-icon {
+        width: 30px;
+        height: 30px;
+        color: #3498db;
+    }
+
+    .uploaded-header h2 {
+        color: #white;
+        font-size: 1.8rem;
+    }
+
+    .image-preview {
+        margin: 30px 0;
+        text-align: center;
+    }
+
+    .image-preview img {
+        max-width: 100%;
+        max-height: 300px;
+        border-radius: 15px;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+    }
+
+    .upload-status {
+        text-align: center;
+        color: #7f8c8d;
+        margin-bottom: 30px;
+    }
+
+    .action-buttons {
+        display: flex;
+        gap: 15px;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+
+    .analyze-btn {
+        background: #3498db;
+        color: white;
+        border: none;
+        padding: 15px 30px;
+        border-radius: 10px;
+        font-size: 1.1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .analyze-btn:hover {
+        background: #2980b9;
+        transform: translateY(-2px);
+    }
+
+    .select-another-btn {
+        background: #ecf0f1;
+        color: #7f8c8d;
+        border: none;
+        padding: 15px 30px;
+        border-radius: 10px;
+        font-size: 1.1rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .select-another-btn:hover {
+        background: #d5dbdb;
+    }
+
+    /* 遺꾩꽍 寃곌낵 �붾㈃ */
+    .result-content {
+        background: white;
+        border-radius: 20px;
+        padding: 40px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    }
+
+    .result-header {
+        text-align: center;
+        margin-bottom: 30px;
+    }
+
+    .success-icon {
+        font-size: 2rem;
+        margin-bottom: 10px;
+        display: block;
+    }
+
+    .result-header h2 {
+        color: #27ae60;
+        font-size: 1.8rem;
+    }
+
+    /* �뚯떇 �뺣낫 移대뱶 */
+    .food-info-card {
+        background: linear-gradient(135deg, #e8f5e8 0%, #f0f8f0 100%);
+        border-radius: 15px;
+        padding: 30px;
+        margin-bottom: 30px;
+        text-align: center;
+    }
+
+    .food-category {
+        color: #7f8c8d;
+        font-size: 0.9rem;
+        margin-bottom: 10px;
+    }
+
+    .food-name {
+        font-size: 2.2rem;
+        color: #2c3e50;
+        font-weight: 700;
+        margin-bottom: 15px;
+    }
+
+    .serving-info {
+        color: #7f8c8d;
+        margin-bottom: 10px;
+    }
+
+    .confidence {
+        color: #27ae60;
+        font-weight: 600;
+    }
+
+    /* �곸뼇 �뺣낫 洹몃━�� */
+    .nutrition-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 20px;
+        margin-bottom: 30px;
+    }
+
+    .nutrition-card {
+        background: white;
+        border-radius: 15px;
+        padding: 25px;
+        text-align: center;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        transition: transform 0.3s ease;
+    }
+
+    .nutrition-card:hover {
+        transform: translateY(-5px);
+    }
+
+    .nutrition-card.calories {
+        border-left: 4px solid #e74c3c;
+    }
+
+    .nutrition-card.carbs {
+        border-left: 4px solid #95a5a6;
+    }
+
+    .nutrition-card.protein {
+        border-left: 4px solid #e67e22;
+    }
+
+    .nutrition-card.fat {
+        border-left: 4px solid #f39c12;
+    }
+
+    .nutrition-icon {
+        font-size: 1.5rem;
+        margin-bottom: 10px;
+    }
+
+    .nutrition-label {
+        color: #7f8c8d;
+        font-size: 0.9rem;
+        margin-bottom: 5px;
+    }
+
+    .nutrition-value {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #2c3e50;
+        margin-bottom: 5px;
+    }
+
+    .nutrition-card.calories .nutrition-value {
+        color: #e74c3c;
+    }
+
+    .nutrition-card.carbs .nutrition-value {
+        color: #95a5a6;
+    }
+
+    .nutrition-card.protein .nutrition-value {
+        color: #e67e22;
+    }
+
+    .nutrition-card.fat .nutrition-value {
+        color: #f39c12;
+    }
+
+    .nutrition-unit {
+        color: #7f8c8d;
+        font-size: 0.9rem;
+    }
+
+    /* 遺꾩꽍 �몃��ы빆 */
+    .analysis-details {
+        background: #f8f9fa;
+        border-radius: 15px;
+        padding: 25px;
+        margin-bottom: 30px;
+    }
+
+    .details-header {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 15px;
+    }
+
+    .bulb-icon {
+        font-size: 1.2rem;
+    }
+
+    .details-header h4 {
+        color: #2c3e50;
+        font-size: 1.2rem;
+    }
+
+    .details-content p {
+        margin-bottom: 15px;
+        color: #555;
+    }
+
+    .details-content ul {
+        list-style: none;
+        padding-left: 0;
+    }
+
+    .details-content li {
+        color: #555;
+        margin-bottom: 8px;
+        padding-left: 20px;
+        position: relative;
+    }
+
+    .details-content li::before {
+        content: "��";
+        color: #3498db;
+        font-weight: bold;
+        position: absolute;
+        left: 0;
+    }
+
+    /* �≪뀡 踰꾪듉�� */
+    .new-analysis-btn {
+        background: #3498db;
+        color: white;
+        border: none;
+        padding: 15px 30px;
+        border-radius: 10px;
+        font-size: 1.1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        margin-right: 15px;
+    }
+
+    .new-analysis-btn:hover {
+        background: #2980b9;
+        transform: translateY(-2px);
+    }
+
+    .add-to-meal-btn {
+        background: #ecf0f1;
+        color: #7f8c8d;
+        border: none;
+        padding: 15px 30px;
+        border-radius: 10px;
+        font-size: 1.1rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .add-to-meal-btn:hover {
+        background: #d5dbdb;
+    }
+
+    /* 諛섏쓳�� �붿옄�� */
+    @media (max-width: 768px) {
+        .container {
+            padding: 15px;
+        }
+
+        .header h1 {
+            font-size: 2rem;
+        }
+
+        .upload-area {
+            padding: 40px 20px;
+        }
+
+        .uploaded-content,
+        .result-content {
+            padding: 25px;
+        }
+
+        .nutrition-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        .action-buttons {
+            flex-direction: column;
+        }
+
+        .action-buttons button {
+            width: 100%;
+            margin-bottom: 10px;
+        }
+    }
+
+    </style>
 </div>
 
-<script>
-    document.addEventListener('DOMContentLoaded', () => {
-        const fileInput = document.getElementById('file-upload');
-        const imagePreview = document.getElementById('image-preview');
-        const uploadSection = document.getElementById('upload-section');
-        const analyzeButton = document.getElementById('analyze-button');
-        const loading = document.getElementById('loading');
-        const resultsContainer = document.getElementById('results-container');
-        const resultImage = document.getElementById('result-image');
-        const errorMessage = document.getElementById('error-message');
-        const resetButton = document.getElementById('reset-button');
-
-        const predictedFoodElem = document.getElementById('predicted-food');
-        const confidenceElem = document.getElementById('confidence');
-        const energyElem = document.getElementById('energy');
-        const carbohydrateElem = document.getElementById('carbohydrate');
-        const proteinElem = document.getElementById('protein');
-        const fatElem = document.getElementById('fat');
-
-        let uploadedFile = null;
-        let uploadedFileUrl = null;
-        const API_URL = 'http://localhost:8000/upload';
-
-        fileInput.addEventListener('change', e => {
-            uploadedFile = e.target.files[0];
-            if (uploadedFile) {
-                const reader = new FileReader();
-                reader.onload = e => {
-                    uploadedFileUrl = e.target.result;
-                    imagePreview.src = uploadedFileUrl;
-                    imagePreview.classList.remove('hidden');
-                };
-                reader.readAsDataURL(uploadedFile);
-            }
-            resultsContainer.classList.add('hidden');
-            errorMessage.classList.add('hidden');
-        });
-
-        analyzeButton.addEventListener('click', async () => {
-            if (!uploadedFile) { errorMessage.textContent='이미지를 먼저 업로드해주세요'; errorMessage.classList.remove('hidden'); return; }
-
-            analyzeButton.disabled = true;
-            loading.classList.remove('hidden');
-            resultsContainer.classList.add('hidden');
-            errorMessage.classList.add('hidden');
-
-            const formData = new FormData();
-            formData.append('file', uploadedFile);
-
-            try {
-                const response = await fetch(API_URL, { method:'POST', body: formData });
-                if(!response.ok) throw new Error(`HTTP 오류 ${response.status}`);
-                const data = await response.json();
-
-                // 🌟 이 부분을 수정했습니다: predicted_food_name -> food_name
-                showResults(data.food_name, data.confidence, data.nutrition_info, uploadedFileUrl);
-
-            } catch(e) {
-                console.error(e);
-                errorMessage.textContent = `분석 실패: ${e.message}`;
-                errorMessage.classList.remove('hidden');
-            } finally {
-                analyzeButton.disabled = false;
-                loading.classList.add('hidden');
-            }
-        });
-
-        resetButton.addEventListener('click', () => {
-            resultsContainer.classList.add('hidden');
-            uploadSection.classList.remove('hidden');
-            fileInput.value='';
-            imagePreview.src='#';
-            uploadedFile=null;
-            uploadedFileUrl=null;
-        });
-
-        function showResults(food, confidence, nutrition, imageSrc){
-            resultImage.src = imageSrc;
-            predictedFoodElem.textContent = food;
-            confidenceElem.textContent = confidence ? `${(confidence*100).toFixed(2)}%` : 'N/A';
-            const safeNutrition = nutrition || {};
-            energyElem.textContent = safeNutrition.calories ?? 'N/A';
-            carbohydrateElem.textContent = safeNutrition.carbohydrates ?? 'N/A';
-            proteinElem.textContent = safeNutrition.protein ?? 'N/A';
-            fatElem.textContent = safeNutrition.fat ?? 'N/A';
-            resultsContainer.classList.remove('hidden');
-            uploadSection.classList.add('hidden');
-        }
-    });
-</script>
 </body>
 </html>

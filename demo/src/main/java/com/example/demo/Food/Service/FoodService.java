@@ -1,6 +1,9 @@
 package com.example.demo.Food.Service;
 
+import com.example.demo.Food.Repository.FoodRepository;
+import com.example.demo.Food.model.Food;
 import com.example.demo.Food.model.dto.FoodResponseDto;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.*;
@@ -18,45 +21,48 @@ import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
+@Transactional  // 트랜잭션 보장
 public class FoodService {
 
+    private final FoodRepository foodRepository;
     private final RestTemplate restTemplate = new RestTemplate();
-    private final String fastApiUrl = "http://localhost:8000/upload"; // FastAPI URL
+    private final String fastApiUrl = "http://localhost:8000/upload";
 
     public FoodResponseDto analyzeFood(MultipartFile file) throws IOException {
         File tempFile = convertMultipartFileToFile(file);
         try {
+            MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
+            body.add("file", new FileSystemResource(tempFile));
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.MULTIPART_FORM_DATA);
 
-            MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
-            body.add("file", new FileSystemResource(tempFile));
-
-            HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
-            ResponseEntity<Map> response = restTemplate.postForEntity(fastApiUrl, requestEntity, Map.class);
+            HttpEntity<MultiValueMap<String, Object>> request = new HttpEntity<>(body, headers);
+            ResponseEntity<Map> response = restTemplate.postForEntity(fastApiUrl, request, Map.class);
 
             Map<String, Object> result = response.getBody();
-            if (result == null) throw new IOException("FastAPI에서 응답이 없습니다.");
+            if (result == null) throw new IOException("FastAPI 응답 없음");
 
-            // FastAPI JSON key 기준
-            String foodName = (String) result.get("food_name");
-            Double confidence = result.get("confidence") instanceof Number ? ((Number) result.get("confidence")).doubleValue() : null;
+            String foodName = (String) result.get("food_name"); // FastAPI JSON 키 확인
+            Map<String, Object> nutrition = (Map<String, Object>) result.getOrDefault("nutrition_info", Collections.emptyMap());
 
-            Map<String, Object> nutrition = result.get("nutrition_info") instanceof Map ?
-                    (Map<String, Object>) result.get("nutrition_info") : Collections.emptyMap();
+            Food foodEntity = Food.builder()
+                    .foodName(foodName)
+                    .calories(toDouble(nutrition.get("calories")))
+                    .protein(toDouble(nutrition.get("protein")))
+                    .fat(toDouble(nutrition.get("fat")))
+                    .carbohydrates(toDouble(nutrition.get("carbohydrates")))
+                    .build();
 
-            Double calories = nutrition.get("calories") instanceof Number ? ((Number) nutrition.get("calories")).doubleValue() : null;
-            Double protein = nutrition.get("protein") instanceof Number ? ((Number) nutrition.get("protein")).doubleValue() : null;
-            Double fat = nutrition.get("fat") instanceof Number ? ((Number) nutrition.get("fat")).doubleValue() : null;
-            Double carbohydrates = nutrition.get("carbohydrates") instanceof Number ? ((Number) nutrition.get("carbohydrates")).doubleValue() : null;
+            System.out.println("저장할 음식: " + foodEntity); // DB 저장 전 로그
+            foodRepository.save(foodEntity); // DB 저장
 
             return FoodResponseDto.builder()
                     .name(foodName)
-                    .confidenceScore(confidence != null ? (int) (confidence * 100) : null)
-                    .calories(calories)
-                    .protein(protein)
-                    .fat(fat)
-                    .carbohydrates(carbohydrates)
+                    .confidenceScore(toConfidence(result.get("confidence")))
+                    .calories(foodEntity.getCalories())
+                    .protein(foodEntity.getProtein())
+                    .fat(foodEntity.getFat())
+                    .carbohydrates(foodEntity.getCarbohydrates())
                     .analysisDetails("FastAPI 모델 예측 결과")
                     .build();
 
@@ -66,11 +72,18 @@ public class FoodService {
     }
 
     private File convertMultipartFileToFile(MultipartFile file) throws IOException {
-        String[] nameParts = file.getOriginalFilename().split("\\.");
-        String prefix = nameParts[0];
-        String suffix = nameParts.length > 1 ? "." + nameParts[1] : null;
-        File tempFile = File.createTempFile(prefix, suffix);
+        File tempFile = File.createTempFile("upload-", file.getOriginalFilename());
         file.transferTo(tempFile);
         return tempFile;
+    }
+
+    private Double toDouble(Object obj) {
+        if (obj instanceof Number) return ((Number) obj).doubleValue();
+        return null;
+    }
+
+    private Integer toConfidence(Object obj) {
+        if (obj instanceof Number) return (int)(((Number) obj).doubleValue() * 100);
+        return null;
     }
 }

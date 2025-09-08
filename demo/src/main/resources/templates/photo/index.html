@@ -56,11 +56,20 @@
             background-color: #e0f2ff;
         }
 
-        .analyzer #image-preview {
-            max-height: 256px;
-            border-radius: 16px;
+        .analyzer #image-previews-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
             margin-bottom: 16px;
-            display: none;
+        }
+
+        .analyzer .image-preview {
+            width: 150px;
+            height: 150px;
+            object-fit: cover;
+            border-radius: 16px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
 
         .analyzer button {
@@ -125,19 +134,26 @@
             text-align: center;
         }
 
-        .analyzer #results-container {
-            display: none;
-            margin-top: 32px;
+        #analysis-results-list {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
         }
 
-        .analyzer #results-container img {
+        .result-item {
+            padding: 16px;
+            border: 1px solid #e0e0e0;
+            border-radius: 16px;
+        }
+
+        .result-item img {
             width: 100%;
             border-radius: 16px;
-            margin-bottom: 16px;
+            margin-bottom: 12px;
         }
 
-        .analyzer #results-container p {
-            margin: 4px 0;
+        .result-item p {
+            margin: 8px 0;
         }
 
         .analyzer select {
@@ -168,9 +184,9 @@
                 <h1>음식 분석기</h1>
 
                 <div id="upload-section">
-                    <input id="file-upload" type="file" accept="image/*">
+                    <input id="file-upload" type="file" accept="image/*" multiple>
                     <label for="file-upload">이미지 선택</label>
-                    <img id="image-preview" />
+                    <div id="image-previews-container"></div>
                     <button id="analyze-button">분석하기</button>
                 </div>
 
@@ -183,24 +199,17 @@
 
                 <div id="results-container">
                     <h2>분석 결과</h2>
-                    <img id="result-image" />
-                    <p>예상 음식: <span id="predicted-food"></span></p>
-                    <p>신뢰도: <span id="confidence"></span></p>
-                    <p>칼로리: <span id="energy"></span></p>
-                    <p>탄수화물: <span id="carbohydrate"></span></p>
-                    <p>단백질: <span id="protein"></span></p>
-                    <p>지방: <span id="fat"></span></p>
-
+                    <div id="analysis-results-list">
+                        </div>
                     <select id="mealTime" name="mealTime">
                         <option value="">식사시간을 선택해주세요.</option>
                         <option value="breakfast">아침</option>
                         <option value="lunch">점심</option>
                         <option value="dinner">저녁</option>
                     </select>
-
                     <div class="button-group">
                         <button id="reset-button">다시 분석</button>
-                        <button id="save-button">음식 저장</button>
+                        <button id="save-button" style="display: none;">음식 저장</button>
                     </div>
                 </div>
             </div>
@@ -213,50 +222,51 @@
 <script>
     document.addEventListener('DOMContentLoaded', () => {
         const fileInput = document.getElementById('file-upload');
-        const imagePreview = document.getElementById('image-preview');
         const uploadSection = document.getElementById('upload-section');
         const analyzeButton = document.getElementById('analyze-button');
         const loading = document.getElementById('loading');
         const resultsContainer = document.getElementById('results-container');
-        const resultImage = document.getElementById('result-image');
         const errorMessage = document.getElementById('error-message');
         const resetButton = document.getElementById('reset-button');
         const saveButton = document.getElementById('save-button');
         const mealTimeSelect = document.getElementById('mealTime');
+        const imagePreviewsContainer = document.getElementById('image-previews-container');
+        const resultsListContainer = document.getElementById('analysis-results-list');
 
         const csrfToken = document.getElementById('csrfToken').value;
         const csrfHeader = document.getElementById('csrfHeader').value;
 
-        const predictedFoodElem = document.getElementById('predicted-food');
-        const confidenceElem = document.getElementById('confidence');
-        const energyElem = document.getElementById('energy');
-        const carbohydrateElem = document.getElementById('carbohydrate');
-        const proteinElem = document.getElementById('protein');
-        const fatElem = document.getElementById('fat');
-
-        let uploadedFile = null;
-        let uploadedFileUrl = null;
-        const API_URL = 'http://localhost:8000/upload';
+        let uploadedFiles = [];
+        let allAnalysisResults = [];
+        const API_URL = 'http://localhost:8001/upload';
 
         // 이미지 업로드
         fileInput.addEventListener('change', e => {
-            uploadedFile = e.target.files[0];
-            if (uploadedFile) {
-                const reader = new FileReader();
-                reader.onload = e => {
-                    uploadedFileUrl = e.target.result;
-                    imagePreview.src = uploadedFileUrl;
-                    imagePreview.style.display = 'block';
-                };
-                reader.readAsDataURL(uploadedFile);
+            uploadedFiles = Array.from(e.target.files);
+            imagePreviewsContainer.innerHTML = '';
+            allAnalysisResults = [];
+            saveButton.style.display = 'none'
+
+            if (uploadedFiles.length > 0) {
+                uploadedFiles.forEach(file => {
+                    const reader = new FileReader();
+                    reader.onload = e => {
+                        const img = document.createElement('img');
+                        img.src = e.target.result;
+                        img.classList.add('image-preview');
+                        imagePreviewsContainer.appendChild(img);
+                    };
+                    reader.readAsDataURL(file);
+                });
             }
+
             resultsContainer.style.display = 'none';
             errorMessage.style.display = 'none';
         });
 
         // 분석하기 버튼
         analyzeButton.addEventListener('click', async () => {
-            if (!uploadedFile) {
+            if (uploadedFiles.length === 0) {
                 errorMessage.textContent = '이미지를 먼저 업로드해주세요';
                 errorMessage.style.display = 'block';
                 return;
@@ -268,13 +278,24 @@
             errorMessage.style.display = 'none';
 
             const formData = new FormData();
-            formData.append('file', uploadedFile);
+            // 모든 파일을 'files'라는 키로 FormData에 추가
+            uploadedFiles.forEach(file => {
+                formData.append('files', file);
+            });
 
             try {
                 const response = await fetch(API_URL, { method: 'POST', body: formData });
                 if (!response.ok) throw new Error(`HTTP 오류 ${response.status}`);
                 const data = await response.json();
-                showResults(data.food_name, data.confidence, data.nutrition_info, uploadedFileUrl);
+                
+                if (data.analysis_results && data.analysis_results.length > 0) {
+                    allAnalysisResults = data.analysis_results;
+                    displayAllResults(allAnalysisResults, uploadedFiles);
+                    saveButton.style.display = 'block'; // id 변경
+                } else {
+                    errorMessage.textContent = '분석 결과가 없습니다.';
+                    errorMessage.style.display = 'block';
+                }
             } catch (e) {
                 console.error(e);
                 errorMessage.textContent = `분석 실패: ${e.message}`;
@@ -290,52 +311,102 @@
             resultsContainer.style.display = 'none';
             uploadSection.style.display = 'flex';
             fileInput.value = '';
-            imagePreview.src = '#';
-            imagePreview.style.display = 'none';
-            uploadedFile = null;
-            uploadedFileUrl = null;
+            imagePreviewsContainer.innerHTML = '';
+            uploadedFiles = [];
+            allAnalysisResults = [];
+            saveButton.style.display = 'none';
         });
 
         // 음식 저장 버튼
         saveButton.addEventListener('click', async () => {
-            const foodData = {
-                foodName: predictedFoodElem.textContent,
-                calories: parseFloat(energyElem.textContent) || null,
-                protein: parseFloat(proteinElem.textContent) || null,
-                fat: parseFloat(fatElem.textContent) || null,
-                carbohydrates: parseFloat(carbohydrateElem.textContent) || null,
-                mealTime: mealTimeSelect.value || null
-            };
+            if (allAnalysisResults.length === 0) {
+                alert('저장할 분석 결과가 없습니다.');
+                return;
+            }
 
-            try {
-                const response = await fetch('/photo/save', {
+            const mealTime = mealTimeSelect.value;
+            if (!mealTime) {
+                alert('식사시간을 선택해주세요.');
+                return;
+            }
+
+            saveButton.disabled = true;
+            let successCount = 0;
+
+            const promises = allAnalysisResults.map(result => {
+                if (result.error) return Promise.resolve(false);
+
+                const safeNutrition = result.nutrition_info || {};
+                const foodData = {
+                    foodName: result.predicted_food_name,
+                    calories: parseFloat(safeNutrition.calories) || null,
+                    protein: parseFloat(safeNutrition.protein) || null,
+                    fat: parseFloat(safeNutrition.fat) || null,
+                    carbohydrates: parseFloat(safeNutrition.carbohydrates) || null,
+                    mealTime: mealTime
+                };
+
+                return fetch('/photo/save', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                         [csrfHeader]: csrfToken
                     },
                     body: JSON.stringify(foodData)
+                }).then(response => {
+                    if (response.ok) {
+                        successCount++;
+                        return true;
+                    }
+                    return false;
+                }).catch(e => {
+                    console.error('저장 실패:', e);
+                    return false;
                 });
+            });
 
-                if (!response.ok) throw new Error(`저장 실패: ${response.status}`);
-                alert('저장되었습니다!');
-                window.location.href = '/diet';
-            } catch (e) {
-                console.error(e);
-                alert(`저장 실패: ${e.message}`);
-            }
+            await Promise.all(promises);
+
+            alert(`${successCount}개의 음식이 성공적으로 저장되었습니다!`);
+            saveButton.disabled = false;
         });
 
-        // 결과 표시
-        function showResults(food, confidence, nutrition, imageSrc) {
-            resultImage.src = imageSrc;
-            predictedFoodElem.textContent = food;
-            confidenceElem.textContent = confidence ? `${(confidence * 100).toFixed(2)}%` : 'N/A';
-            const safeNutrition = nutrition || {};
-            energyElem.textContent = safeNutrition.calories ?? 'N/A';
-            carbohydrateElem.textContent = safeNutrition.carbohydrates ?? 'N/A';
-            proteinElem.textContent = safeNutrition.protein ?? 'N/A';
-            fatElem.textContent = safeNutrition.fat ?? 'N/A';
+        // 모든 결과를 화면에 표시하는 함수
+        function displayAllResults(results, files) {
+            resultsListContainer.innerHTML = ''; // 기존 결과 초기화
+
+            results.forEach((result, index) => {
+                const file = files[index];
+                const resultItem = document.createElement('div');
+                resultItem.classList.add('result-item');
+
+                if (result.error) {
+                    resultItem.innerHTML = `
+                        <p><strong>${result.file_name}</strong>: <span style="color: red;">${result.error}</span></p>
+                    `;
+                } else {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        const img = document.createElement('img');
+                        img.src = e.target.result;
+                        resultItem.prepend(img);
+                    };
+                    reader.readAsDataURL(file);
+
+                    const safeNutrition = result.nutrition_info || {};
+                    resultItem.innerHTML += `
+                        <p>예상 음식: <strong>${result.predicted_food_name}</strong></p>
+                        <p>신뢰도: ${(result.confidence * 100).toFixed(2)}%</p>
+                        <p>칼로리: ${safeNutrition.calories ?? 'N/A'}</p>
+                        <p>탄수화물: ${safeNutrition.carbohydrate ?? 'N/A'}</p>
+                        <p>단백질: ${safeNutrition.protein ?? 'N/A'}</p>
+                        <p>지방: ${safeNutrition.fat ?? 'N/A'}</p>
+                        <hr>
+                    `;
+                }
+                resultsListContainer.appendChild(resultItem);
+            });
+
             resultsContainer.style.display = 'block';
             uploadSection.style.display = 'none';
         }

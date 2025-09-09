@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <title>식단 캘린더</title>
+    <link rel="stylesheet" th:href="@{/main.css}">
+    <style>
+        .wrap {
+            max-width: 980px;
+            margin: 30px auto;
+            /*font-family: system-ui, sans-serif;*/
+        }
+
+        .view-toggle {
+            margin-bottom: 16px;
+            text-align: center;
+        }
+
+        table.calendar {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: center;
+        }
+
+        table.calendar th {
+            background-color: black;
+            font-weight: bold;
+            color: white;
+            padding: 4px;
+        }
+
+        table.calendar td {
+            border: 1px solid #ddd;
+            width: 14%;
+            height: 100px;
+            vertical-align: top;
+            position: relative;
+        }
+
+        .day {
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        .kcal {
+            display: block;
+            margin-top: 8px;
+            font-size: 12px;
+            color: #1f7aec;
+            cursor: pointer;
+        }
+
+        .list-mode {
+            margin-top: 16px;
+        }
+
+        .list-item {
+            padding: 8px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .month-selector {
+            margin: 16px 0;
+            text-align: center;
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            margin-top: 12px;
+            gap: 6px;
+        }
+
+        .pagination a {
+            display: inline-block;
+            padding: 6px 12px;
+            border: 1px solid #ccc;
+            /*border-radius: 4px;*/
+            text-decoration: none;
+            color: #333;
+            transition: 0.2s;
+        }
+
+        .pagination a:hover {
+            background-color: #f0f0f0;
+        }
+
+        .pagination a.active {
+            background-color: black;
+            color: white;
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+    <header th:replace="~{common:: header}"></header>
+    <main>
+        <div class="wrap">
+            <h2 style="text-align: center;">내 식단 기록</h2>
+
+            <!-- 뷰 토글 -->
+            <div class="view-toggle">
+                <label><input type="radio" name="mode" value="calendar" checked> 캘린더</label>
+                <label><input type="radio" name="mode" value="list"> 날짜별</label>
+            </div>
+
+            <!-- 연/월 선택 -->
+            <div class="month-selector">
+                <input type="month" id="monthPicker"
+                    th:value="${year} + '-' + (${month} < 10 ? '0' + ${month} : ${month})">
+                <button type="button" onclick="goToSelectedMonth()">이동</button>
+            </div>
+
+            <!-- 캘린더 뷰 -->
+            <div id="calendar-view">
+                <table class="calendar">
+                    <thead>
+                        <tr>
+                            <th>일</th>
+                            <th>월</th>
+                            <th>화</th>
+                            <th>수</th>
+                            <th>목</th>
+                            <th>금</th>
+                            <th>토</th>
+                        </tr>
+                    </thead>
+                    <tbody id="calendar-body"></tbody>
+                </table>
+            </div>
+
+            <!-- 날짜별 뷰 -->
+            <div id="list-view" class="list-mode" style="display:none;">
+                <div th:each="d : ${diets}" class="list-item">
+                    <span th:text="${d.dietDate}">2025-09-01</span>
+                    <span class="kcal" th:text="${d.totalKcal} + ' kcal'"
+                        th:attr="data-date=${#temporals.format(d.dietDate,'yyyy-MM-dd')}">0 kcal</span>
+                </div>
+
+                <!-- 페이징 -->
+                <div class="pagination" style="text-align:center; margin-top:12px;" th:if="${totalPages > 0}">
+                    <span th:if="${page > 0}">
+                        <a th:href="@{|/record/calendar?year=${year}&month=${month}&page=${page - 1}|}">이전</a>
+                    </span>
+                    <span th:each="i : ${#numbers.sequence(0, totalPages - 1)}">
+                        <a th:href="@{|/record/calendar?year=${year}&month=${month}&page=${i}|}" th:text="${i + 1}"
+                            th:classappend="${i == page} ? 'active'"></a>
+                    </span>
+                    <span th:if="${page < totalPages - 1}">
+                        <a th:href="@{|/record/calendar?year=${year}&month=${month}&page=${page + 1}|}">다음</a>
+                    </span>
+                </div>
+                <div th:if="${diets.size() == 0}" style="text-align:center; margin-top:20px; color:#888;">
+                    조회된 기록이 없습니다.
+                </div>
+            </div>
+        </div>
+    </main>
+    <footer th:replace="~{common:: footer}"></footer>
+
+    <script th:inline="javascript">
+        const summary = /*[[${summary}]]*/ {};
+        let currentYear = /*[[${year}]]*/ 2025;
+        let currentMonth = /*[[${month}]]*/ 9;
+
+        function renderCalendar(year = currentYear, month = currentMonth) {
+            const firstDay = new Date(year, month - 1, 1).getDay();
+            const lastDate = new Date(year, month, 0).getDate();
+            const tbody = document.getElementById("calendar-body");
+            tbody.innerHTML = "";
+
+            let row = document.createElement("tr");
+            for (let i = 0; i < firstDay; i++) row.appendChild(document.createElement("td"));
+
+            for (let day = 1; day <= lastDate; day++) {
+                const cell = document.createElement("td");
+                cell.innerHTML = `<div class="day">${day}</div>`;
+
+                const dateStr = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                if (summary[dateStr]) {
+                    const span = document.createElement("span");
+                    span.className = "kcal";
+                    span.innerText = summary[dateStr] + " kcal";
+                    span.setAttribute("data-date", dateStr);
+                    span.addEventListener("click", () => {
+                        location.href = "/record/" + dateStr;
+                    });
+                    cell.appendChild(span);
+                }
+                row.appendChild(cell);
+
+                if ((firstDay + day) % 7 === 0) {
+                    tbody.appendChild(row);
+                    row = document.createElement("tr");
+                }
+            }
+            if (row.children.length) tbody.appendChild(row);
+
+            currentYear = year;
+            currentMonth = month;
+        }
+
+        function goToSelectedMonth() {
+            const val = document.getElementById("monthPicker").value;
+            if (!val) return;
+            const [y, m] = val.split("-");
+            location.href = `/record/calendar?year=${y}&month=${m}`;
+        }
+
+        renderCalendar();
+
+        // 라디오 버튼 토글 + 날짜별 클릭 이벤트
+        const viewRadios = document.querySelectorAll("input[name='mode']");
+        viewRadios.forEach(radio => {
+            radio.addEventListener("change", e => {
+                document.getElementById("calendar-view").style.display = e.target.value === "calendar" ? "block" : "none";
+                document.getElementById("list-view").style.display = e.target.value === "list" ? "block" : "none";
+            });
+        });
+
+        // 날짜별 view span 클릭 이벤트
+        document.querySelectorAll("#list-view .kcal").forEach(span => {
+            span.addEventListener("click", () => {
+                const date = span.getAttribute("data-date");
+                location.href = "/record/" + date;
+            });
+        });
+    </script>
+</body>
+
+</html>

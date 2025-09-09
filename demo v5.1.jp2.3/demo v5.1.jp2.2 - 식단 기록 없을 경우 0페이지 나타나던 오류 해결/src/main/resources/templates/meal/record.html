@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<head>
+    <meta charset="UTF-8">
+    <title>내 식단 기록</title>
+    <link rel="stylesheet" th:href="@{/main.css}">
+    <style>
+        .wrap {
+            max-width: 1000px;
+            margin: 24px auto;
+            /*font-family: system-ui, sans-serif*/
+        }
+
+        h2 {
+            font-size: 22px;
+            margin: 8px 0 16px
+        }
+
+        .empty {
+            color: #666;
+            background: #fafafa;
+            border: 1px dashed #c4c3c3;
+            border-radius: 10px;
+            padding: 16px
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: #fff;
+            border-radius: 12px;
+            overflow: hidden
+        }
+
+        th,
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #c4c3c3;
+            vertical-align: top
+        }
+
+        th {
+            background: #f6f7fb;
+            text-align: left;
+            font-weight: 600
+        }
+
+        tbody tr:hover {
+            background: #fafcff
+        }
+
+        .menu {
+            white-space: pre-line
+        }
+    </style>
+</head>
+
+<body>
+    <header th:replace="~{common:: header}"></header>
+    <main>
+        <div class="wrap">
+            <h2 th:text="'내 식단 기록 - ' + ${date}">내 식단 기록</h2>
+
+            <!-- 비어있을 때 안내 -->
+            <div th:if="${d == null}" class="empty">
+                해당 날짜에 저장된 식단이 없습니다.
+            </div>
+
+            <!-- 단일 날짜 상세 -->
+            <table th:if="${d != null}" class="ask-table">
+                <thead>
+                    <tr>
+                        <th>아침</th>
+                        <th>점심</th>
+                        <th>저녁</th>
+                        <th>총칼로리</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td th:text="${d.breakfast}">-</td>
+                        <td th:text="${d.lunch}">-</td>
+                        <td th:text="${d.dinner}">-</td>
+                        <td th:text="${d.totalKcal} + ' kcal'">0 kcal</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </main>
+    <footer th:replace="~{common:: footer}"></footer>
+</body>
+
+</html>

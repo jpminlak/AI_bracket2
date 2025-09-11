@@ -1,4 +1,4 @@
-<img width="561" height="441" alt="image" src="https://github.com/user-attachments/assets/88afa3fa-7bdb-4967-81e5-4fa40bad9200" /><div style="text-align: center;">
+
   <img src="./MEAL MIND.png" alt="logo" width="550">
 </div>
 
@@ -114,6 +114,11 @@
 ▶ [**📑 요구사항 정의서 바로가기**](https://docs.google.com/spreadsheets/d/1WSLjV17Llg2p0DN2wyvz9vuMrkYNvfDEmSVrAsvDE5U/edit?gid=0#gid=0)
 
 ### **서비스 화면**
+- 메인화면
+<img width="499" height="356" alt="image" src="https://github.com/user-attachments/assets/98b78f6a-e75e-4b4c-b137-fd1a9d0f7cd7" />
+
+- 음식분석
+<img width="561" height="441" alt="image" src="https://github.com/user-attachments/assets/c53e5b5a-60e1-484a-81c6-416e6c09755c" />
 
 ### **📂 파일 구조도**
 📦Final

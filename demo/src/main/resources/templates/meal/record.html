@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<head>
+    <meta charset="UTF-8">
+    <title>내 식단 기록</title>
+    <link rel="stylesheet" th:href="@{/main.css}">
+    <style>
+        .wrap {
+            max-width:80%;
+            margin: 24px auto;
+            padding: 24px;
+            border: 1px solid black;
+            border-radius: 12px;
+        }
+
+        h2 {
+            font-size: 22px;
+            margin: 8px 0 16px
+        }
+
+        .empty {
+            color: #666;
+            background: #fafafa;
+            border: 1px dashed #c4c3c3;
+            border-radius: 10px;
+            padding: 16px
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: #fff;
+            border-radius: 12px;
+            overflow: hidden
+        }
+
+        th,
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #c4c3c3;
+            vertical-align: top
+        }
+
+        th{
+            text-align: left;
+            color: white;
+            font-weight: 600
+        }
+
+        .th-left{
+            background: black;
+        }
+
+        .th-right {
+            /*background: #f6f7fb;*/
+            background: linear-gradient(to right, black, darkgray, white);
+        }
+
+        td {
+            width: 50%;
+        }
+
+        tbody tr:hover {
+            background: #fafcff
+        }
+
+        .menu {
+            white-space: pre-line
+        }
+
+        .btn-normal {
+            display: inline-block;
+            padding: 10px 20px;
+            margin-top: 20px;
+            text-align: center;
+            font-size: 16px;
+            font-weight: bold;
+            color: #fff;
+            background: #000;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: .3s;
+            text-decoration: none;
+        }
+
+        .btn-normal:hover {
+            background: #acabab;
+            color: #000;
+        }
+    </style>
+</head>
+
+<body>
+    <header th:replace="~{common:: header}"></header>
+    <main>
+        <div class="wrap">
+            <h2 style="text-align: center;">내 식단 기록</h2>
+            <h3 style="text-align: center;" th:text="${date}"></h3>
+
+            <!-- 비어있을 때 안내 -->
+            <div th:if="${d == null}" class="empty">
+                해당 날짜에 저장된 식단이 없습니다.
+            </div>
+            <br>
+            <!-- 단일 날짜 상세 -->
+            <table th:if="${d != null}" class="ask-table">
+                <thead>
+                    <tr>
+                        <th class="th-left">아침</th>
+                        <th class="th-right">영양</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td th:text="${d.breakfast}">-</td>
+                        <td>
+                            칼로리: <span th:text="${d.breakfastKcal}"></span> kcal ·
+                            탄수화물: <span th:text="${d.breakfastCarbs}"></span> g ·
+                            단백질: <span th:text="${d.breakfastProtein}"></span> g ·
+                            지방: <span th:text="${d.breakfastFat}"></span> g
+                        </td>
+                    </tr>
+                </tbody>
+            </table><br>
+            <table th:if="${d != null}" class="ask-table">
+                <thead>
+                    <tr>
+                        <th class="th-left">점심</th>
+                        <th class="th-right">영양</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td th:text="${d.lunch}">-</td>
+                        <td>
+                            칼로리: <span th:text="${d.lunchKcal}"></span> kcal ·
+                            탄수화물: <span th:text="${d.lunchCarbs}"></span> g ·
+                            단백질: <span th:text="${d.lunchProtein}"></span> g ·
+                            지방: <span th:text="${d.lunchFat}"></span> g
+                        </td>
+                    </tr>
+                </tbody>
+            </table><br>
+            <table th:if="${d != null}" class="ask-table">
+                <thead>
+                    <tr>
+                        <th class="th-left">저녁</th>
+                        <th class="th-right">영양</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td th:text="${d.dinner}">-</td>
+                        <td>
+                            칼로리: <span th:text="${d.dinnerKcal}"></span> kcal ·
+                            탄수화물: <span th:text="${d.dinnerCarbs}"></span> g ·
+                            단백질: <span th:text="${d.dinnerProtein}"></span> g ·
+                            지방: <span th:text="${d.dinnerFat}"></span> g
+                        </td>
+                    </tr>
+                </tbody>
+            </table><br>
+            <p><strong>총 칼로리: <span th:text="${d.totalKcal}"></span> kcal</strong></p>
+            <div><a th:href="@{/record/calendar}" class="btn-normal">돌아가기</a></div>
+        </div>
+    </main>
+    <footer th:replace="~{common:: footer}"></footer>
+</body>
+
+</html>

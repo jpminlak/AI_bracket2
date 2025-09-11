@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="kor" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>음식 분석 & 추천 - 감정 분석 식단 추천</title>
+    <link rel="stylesheet" th:href="@{/main.css}">
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+</head>
+<style>
+    .mood-analysis-container {
+        width: 100%;
+        max-width: 650px;
+        text-align: center;
+        margin: auto;
+        /* 이 한 줄을 추가하여 수평 중앙 정렬 */
+    }
+
+    .mood-analysis-box {
+        background-color: #ffffff;
+        border-radius: 15px;
+        padding: 40px;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
+        text-align: center;
+        transition: transform 0.2s ease;
+    }
+
+    .mood-analysis-box h2 {
+        margin-bottom: 30px;
+        color: #2c3e50;
+        font-size: 1.8rem;
+    }
+
+    .input-area {
+        display: flex;
+        justify-content: center;
+        margin-bottom: 25px;
+    }
+
+    .input-area input {
+        width: 70%;
+        padding: 14px;
+        border: 1px solid #ced4da;
+        border-radius: 8px;
+        background-color: #fff;
+        color: #495057;
+        font-size: 1rem;
+        transition: border-color 0.3s;
+    }
+
+    .input-area input:focus {
+        border-color: #007bff;
+        outline: none;
+    }
+
+    .input-area button {
+        padding: 14px 28px;
+        background: linear-gradient(135deg, #007bff, #00c6ff);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        margin-left: 12px;
+        transition: background 0.3s, transform 0.2s;
+        font-size: 1rem;
+    }
+
+    .input-area button:hover {
+        background: linear-gradient(135deg, #0056b3, #00a6d6);
+        transform: translateY(-2px);
+    }
+
+    .response-area {
+        margin-top: 20px;
+        background-color: #f8f9fa;
+        border-radius: 10px;
+        padding: 25px;
+        text-align: left;
+        line-height: 1.6;
+        font-size: 1rem;
+        box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.05);
+        animation: fadeIn 0.8s ease-in-out;
+    }
+
+    .response-area b {
+        color: #007bff;
+        font-size: 1.1rem;
+    }
+</style>
+
+<body>
+    <header th:replace="~{common:: header}"></header>
+    <main>
+        <div class="mood-analysis-container">
+            <div class="mood-analysis-box">
+                <h2>✨ 감정분석 식단추천 ✨</h2>
+                <div class="input-area">
+                    <input type="text" id="emotion-input" placeholder="지금 기분을 입력하세요">
+                    <button id="predict-button">확인</button>
+                </div>
+                <div class="response-area">
+                    <p id="response-text">😊 기분을 입력하면 맞춤 음식을 추천해드려요!</p>
+                </div>
+            </div>
+        </div>
+    </main>
+    <footer th:replace="~{common:: footer}"></footer>
+</body>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const inputElement = document.getElementById('emotion-input');
+        const buttonElement = document.getElementById('predict-button');
+        const responseElement = document.getElementById('response-text');
+
+        buttonElement.addEventListener('click', function () {
+            const text = inputElement.value;
+
+            if (!text) {
+                responseElement.innerText = "⚠️ 기분을 입력해주세요!";
+                return;
+            }
+
+            axios.post('http://127.0.0.1:8000/predict', { text: text })
+                .then(function (response) {
+                    const emotion = response.data.predicted_emotion;
+                    const recommendation = response.data.recommendation;
+
+                    responseElement.innerHTML = `
+                        <b>당신의 감정은 '${emotion}'입니다.</b><br><br>
+                        ${recommendation}
+                    `;
+                })
+                .catch(function (error) {
+                    console.error('예측 오류:', error);
+                    let errorMessage = "❌ 예측에 실패했습니다. 다시 시도해주세요.";
+                    if (error.response && error.response.data && error.response.data.detail) {
+                        errorMessage = error.response.data.detail;
+                    }
+                    responseElement.innerText = errorMessage;
+                });
+        });
+    });
+</script>
+
+</html>

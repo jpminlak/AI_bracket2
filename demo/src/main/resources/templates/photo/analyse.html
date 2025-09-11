@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>음식 분석기</title>
+    <link rel="stylesheet" th:href="@{/main.css}">
+    <style>
+        .analyzer {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 16px;
+        }
+
+        .analyzer .container {
+            background-color: #fff;
+            padding: 32px;
+            border-radius: 24px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 500px;
+        }
+
+        .analyzer h1 {
+            text-align: center;
+            font-size: 2rem;
+            margin-bottom: 24px;
+        }
+
+        .analyzer #upload-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .analyzer input[type="file"] {
+            display: none;
+        }
+
+        .analyzer label {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            height: 180px;
+            border: 2px solid #3b82f6;
+            border-radius: 16px;
+            cursor: pointer;
+            margin-bottom: 16px;
+            transition: background-color 0.2s;
+        }
+
+        .analyzer label:hover {
+            background-color: #e0f2ff;
+        }
+
+        .analyzer #image-previews-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            margin-bottom: 16px;
+        }
+
+        .analyzer .image-preview {
+            width: 150px;
+            height: 150px;
+            object-fit: cover;
+            border-radius: 16px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .analyzer button {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 16px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: opacity 0.2s;
+        }
+
+        .analyzer #analyze-button {
+            background-color: #3b82f6;
+            color: #fff;
+        }
+
+        .analyzer #analyze-button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .analyzer #reset-button {
+            background-color: #d1d5db;
+        }
+
+        .analyzer #save-button {
+            background-color: #22c55e;
+            color: #fff;
+        }
+
+        .analyzer .loading-spinner {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            border-top: 4px solid #3b82f6;
+            border-radius: 50%;
+            width: 48px;
+            height: 48px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .analyzer #loading {
+            display: none;
+            margin-top: 24px;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .analyzer #error-message {
+            color: red;
+            margin-top: 24px;
+            display: none;
+            text-align: center;
+        }
+
+        #analysis-results-list {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .result-item {
+            padding: 16px;
+            border: 1px solid #e0e0e0;
+            border-radius: 16px;
+        }
+
+        .result-item img {
+            width: 100%;
+            border-radius: 16px;
+            margin-bottom: 12px;
+        }
+
+        .result-item p {
+            margin: 8px 0;
+        }
+
+        .analyzer select {
+            width: 100%;
+            padding: 8px;
+            border-radius: 8px;
+            margin-bottom: 16px;
+        }
+
+        .analyzer .button-group {
+            display: flex;
+            gap: 8px;
+            margin-top: 16px;
+        }
+    </style>
+</head>
+
+<body>
+    <header th:replace="~{common:: header}"></header>
+
+    <main>
+        <div class="analyzer">
+            <div class="container">
+                <!-- ✅ CSRF 토큰 hidden input -->
+                <input type="hidden" id="csrfToken" th:value="${_csrf.token}" />
+                <input type="hidden" id="csrfHeader" th:value="${_csrf.headerName}" />
+
+                <h1>음식 분석기</h1>
+
+                <div id="upload-section">
+                    <input id="file-upload" type="file" accept="image/*" multiple>
+                    <label for="file-upload">이미지 선택</label>
+                    <div style="font-size: 0.75rem;">※ 여러 장을 올리고 싶다면, 탐색기에서 Ctrl을 누른 상태에서 사진들을 클릭해주세요.</div>
+                    <div id="image-previews-container"></div>
+                    <button id="analyze-button">분석하기</button>
+                </div>
+
+                <div id="loading">
+                    <div class="loading-spinner"></div>
+                    <span style="margin-left: 16px;">분석 중...</span>
+                </div>
+
+                <div id="error-message"></div>
+
+                <div id="results-container">
+                    <h2>분석 결과</h2>
+                    <div id="analysis-results-list">
+                        </div>
+                    <select id="mealTime" name="mealTime">
+                        <option value="">식사시간을 선택해주세요.</option>
+                        <option value="breakfast">아침</option>
+                        <option value="lunch">점심</option>
+                        <option value="dinner">저녁</option>
+                    </select>
+                    <div class="button-group">
+                        <button id="reset-button">다시 분석</button>
+                        <button id="save-button" style="display: none;">음식 저장</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer th:replace="~{common:: footer}"></footer>
+</body>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const fileInput = document.getElementById('file-upload');
+        const uploadSection = document.getElementById('upload-section');
+        const analyzeButton = document.getElementById('analyze-button');
+        const loading = document.getElementById('loading');
+        const resultsContainer = document.getElementById('results-container');
+        const errorMessage = document.getElementById('error-message');
+        const resetButton = document.getElementById('reset-button');
+        const saveButton = document.getElementById('save-button');
+        const mealTimeSelect = document.getElementById('mealTime');
+        const imagePreviewsContainer = document.getElementById('image-previews-container');
+        const resultsListContainer = document.getElementById('analysis-results-list');
+
+        const csrfToken = document.getElementById('csrfToken').value;
+        const csrfHeader = document.getElementById('csrfHeader').value;
+
+        let uploadedFiles = [];
+        let allAnalysisResults = [];
+        const API_URL = 'http://localhost:8002/upload';
+
+        // 이미지 업로드
+        fileInput.addEventListener('change', e => {
+            uploadedFiles = Array.from(e.target.files);
+            imagePreviewsContainer.innerHTML = '';
+            allAnalysisResults = [];
+            saveButton.style.display = 'none'
+
+            if (uploadedFiles.length > 0) {
+                uploadedFiles.forEach(file => {
+                    const reader = new FileReader();
+                    reader.onload = e => {
+                        const img = document.createElement('img');
+                        img.src = e.target.result;
+                        img.classList.add('image-preview');
+                        imagePreviewsContainer.appendChild(img);
+                    };
+                    reader.readAsDataURL(file);
+                });
+            }
+
+            resultsContainer.style.display = 'none';
+            errorMessage.style.display = 'none';
+        });
+
+        // 분석하기 버튼
+        analyzeButton.addEventListener('click', async () => {
+            if (uploadedFiles.length === 0) {
+                errorMessage.textContent = '이미지를 먼저 업로드해주세요';
+                errorMessage.style.display = 'block';
+                return;
+            }
+
+            analyzeButton.disabled = true;
+            loading.style.display = 'flex';
+            resultsContainer.style.display = 'none';
+            errorMessage.style.display = 'none';
+
+            const formData = new FormData();
+            // 모든 파일을 'files'라는 키로 FormData에 추가
+            uploadedFiles.forEach(file => {
+                formData.append('files', file);
+            });
+
+            try {
+                const response = await fetch(API_URL, { method: 'POST', body: formData });
+                if (!response.ok) throw new Error(`HTTP 오류 ${response.status}`);
+                const data = await response.json();
+                
+                if (data.analysis_results && data.analysis_results.length > 0) {
+                    allAnalysisResults = data.analysis_results;
+                    displayAllResults(allAnalysisResults, uploadedFiles);
+                    saveButton.style.display = 'block'; // id 변경
+                } else {
+                    errorMessage.textContent = '분석 결과가 없습니다.';
+                    errorMessage.style.display = 'block';
+                }
+            } catch (e) {
+                console.error(e);
+                errorMessage.textContent = `분석 실패: ${e.message}`;
+                errorMessage.style.display = 'block';
+            } finally {
+                analyzeButton.disabled = false;
+                loading.style.display = 'none';
+            }
+        });
+
+        // 다시 분석 버튼
+        resetButton.addEventListener('click', () => {
+            resultsContainer.style.display = 'none';
+            uploadSection.style.display = 'flex';
+            fileInput.value = '';
+            imagePreviewsContainer.innerHTML = '';
+            uploadedFiles = [];
+            allAnalysisResults = [];
+            saveButton.style.display = 'none';
+        });
+
+        // 음식 저장 버튼
+        saveButton.addEventListener('click', async () => {
+            if (allAnalysisResults.length === 0) {
+                alert('저장할 분석 결과가 없습니다.');
+                return;
+            }
+
+            const mealTime = mealTimeSelect.value;
+            if (!mealTime) {
+                alert('식사시간을 선택해주세요.');
+                return;
+            }
+
+            saveButton.disabled = true;
+            let successCount = 0;
+
+            const promises = allAnalysisResults.map(result => {
+                if (result.error) return Promise.resolve(false);
+
+                const safeNutrition = result.nutrition_info || {};
+                const foodData = {
+                    foodName: result.predicted_food_name,
+                    calories: parseFloat(safeNutrition.calories) || null,
+                    protein: parseFloat(safeNutrition.protein) || null,
+                    fat: parseFloat(safeNutrition.fat) || null,
+                    carbohydrates: parseFloat(safeNutrition.carbohydrate) || null,
+                    mealTime: mealTime
+                };
+
+                return fetch('/photo/save', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        [csrfHeader]: csrfToken
+                    },
+                    body: JSON.stringify(foodData)
+                }).then(response => {
+                    if (response.ok) {
+                        successCount++;
+                        return true;
+                    }
+                    return false;
+                }).catch(e => {
+                    console.error('저장 실패:', e);
+                    return false;
+                });
+            });
+
+            await Promise.all(promises);
+
+            alert(`${successCount}개의 음식이 성공적으로 저장되었습니다!`);
+            saveButton.disabled = false;
+            window.location.href = "/diet";
+        });
+
+        // 모든 결과를 화면에 표시하는 함수
+        function displayAllResults(results, files) {
+            resultsListContainer.innerHTML = ''; // 기존 결과 초기화
+
+            results.forEach((result, index) => {
+                const file = files[index];
+                const resultItem = document.createElement('div');
+                resultItem.classList.add('result-item');
+
+                if (result.error) {
+                    resultItem.innerHTML = `
+                        <p><strong>${result.file_name}</strong>: <span style="color: red;">${result.error}</span></p>
+                    `;
+                } else {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        const img = document.createElement('img');
+                        img.src = e.target.result;
+                        resultItem.prepend(img);
+                    };
+                    reader.readAsDataURL(file);
+
+                    const safeNutrition = result.nutrition_info || {};
+                    resultItem.innerHTML += `
+                        <p>예상 음식: <strong>${result.predicted_food_name}</strong></p>
+                        <p>신뢰도: ${(result.confidence * 100).toFixed(2)}%</p>
+                        <p>칼로리: ${safeNutrition.calories ?? 'N/A'}</p>
+                        <p>탄수화물: ${safeNutrition.carbohydrate ?? 'N/A'}</p>
+                        <p>단백질: ${safeNutrition.protein ?? 'N/A'}</p>
+                        <p>지방: ${safeNutrition.fat ?? 'N/A'}</p>
+                        <hr>
+                    `;
+                }
+                resultsListContainer.appendChild(resultItem);
+            });
+
+            resultsContainer.style.display = 'block';
+            uploadSection.style.display = 'none';
+        }
+    });
+</script>
+
+</html>

@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>식단 기록</title>
+    <!-- Font for clean typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #4f46e5;
+            --secondary-color: #6b7280;
+            --background-color: #f0f4f8;
+            --card-background: #ffffff;
+            --text-color-primary: #1f2937;
+            --text-color-secondary: #6b7280;
+            --accent-blue: #60a5fa;
+            --accent-orange: #fb923c;
+            --accent-red: #ef4444;
+            --accent-indigo: #e0e7ff;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--background-color);
+            padding: 2rem;
+            display: flex;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 960px;
+            width: 100%;
+        }
+
+        /* -------------------- Header Section -------------------- */
+        .header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        .header-icon {
+            display: inline-block;
+            color: var(--primary-color);
+            width: 2rem;
+            height: 2rem;
+            margin-right: 0.5rem;
+            vertical-align: middle;
+        }
+        .title {
+            font-size: 2.25rem;
+            font-weight: 600;
+            color: var(--text-color-primary);
+            display: inline-block;
+            vertical-align: middle;
+        }
+        .subtitle {
+            font-size: 1rem;
+            color: var(--text-color-secondary);
+            margin-top: 0.5rem;
+        }
+
+        /* -------------------- Stats Cards Section -------------------- */
+        .stats-cards {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .card {
+            background-color: var(--card-background);
+            padding: 1.5rem;
+            border-radius: 1rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            transition: transform 0.3s ease;
+        }
+        .card:hover {
+            transform: scale(1.03);
+        }
+        .card-icon-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 3rem;
+            height: 3rem;
+            border-radius: 9999px;
+            margin: 0 auto 1rem;
+        }
+        .card-icon {
+            width: 1.5rem;
+            height: 1.5rem;
+            color: var(--card-background);
+        }
+        .total-records-icon-bg { background-color: var(--accent-blue); }
+        .average-calories-icon-bg { background-color: var(--accent-orange); }
+        .max-calories-icon-bg { background-color: var(--accent-red); }
+
+        .card-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: var(--text-color-primary);
+        }
+        .card-value {
+            font-size: 1.875rem;
+            font-weight: 700;
+            color: var(--text-color-primary);
+            margin: 0.5rem 0;
+        }
+        .card-unit {
+            font-size: 0.875rem;
+            color: var(--text-color-secondary);
+        }
+
+        /* -------------------- No Records Section -------------------- */
+        .no-records-card {
+            background-color: var(--card-background);
+            padding: 2rem;
+            border-radius: 1rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+        .no-records-icon {
+            width: 4rem;
+            height: 4rem;
+            color: #d1d5db;
+            margin: 0 auto 1.5rem;
+        }
+        .no-records-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text-color-primary);
+            margin-bottom: 0.5rem;
+        }
+        .no-records-text {
+            color: var(--text-color-secondary);
+            margin-bottom: 1.5rem;
+        }
+
+        .cta-button {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.5rem 1rem;
+            border-radius: 9999px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--primary-color);
+            background-color: var(--accent-indigo);
+            text-decoration: none;
+            transition: background-color 0.3s ease;
+        }
+        .cta-button:hover {
+            background-color: #c7d2fe;
+        }
+        .cta-icon {
+            width: 1rem;
+            height: 1rem;
+            margin-right: 0.5rem;
+        }
+
+        /* -------------------- Responsive Design -------------------- */
+        @media (max-width: 768px) {
+            .stats-cards {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <!-- Header Section -->
+    <div class="header">
+        <svg class="header-icon" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 16 16">
+            <path d="M4.532 1.284a.5.5 0 0 1 .815.195l.895 3.579a.5.5 0 0 0 .393.308l3.424.685a.5.5 0 0 1 .371.745L9.36 10.1a.5.5 0 0 0-.173.498l.564 3.486a.5.5 0 0 1-.722.529l-3.041-1.631a.5.5 0 0 0-.441 0L2.81 14.613a.5.5 0 0 1-.722-.529l.564-3.486a.5.5 0 0 0-.173-.498L.548 6.81a.5.5 0 0 1 .371-.745l3.424-.685a.5.5 0 0 0 .393-.308zM10.027 4.51a.908.908 0 0 0-.74.195a.5.5 0 0 1-.606-.05L7.846 3.73a.5.5 0 0 1 .232-.91l1.726-.237a.908.908 0 0 0 .74-.195a.5.5 0 0 1 .606.05L12.154 4.1a.5.5 0 0 1-.232.91l-1.726.237z"/>
+        </svg>
+        <h1 class="title">식단 기록</h1>
+        <p class="subtitle">지금까지 저장하신 식단 기록을 확인하실 수 있습니다.</p>
+    </div>
+
+    <!-- Stats Cards Section -->
+    <div class="stats-cards">
+        <!-- Total Records Card -->
+        <div class="card">
+            <div class="card-icon-container total-records-icon-bg">
+                <svg class="card-icon" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 16 16">
+                    <path d="M4 11h2v3H4zm6 0h2v3h-2zm-3-5h2v8h-2zm6 0h2v8h-2zM3 0a3 3 0 0 0-3 3v10a3 3 0 0 0 3 3h10a3 3 0 0 0 3-3V3a3 3 0 0 0-3-3H3zM2 3a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3z"/>
+                </svg>
+            </div>
+            <h3 class="card-title">총 기록일</h3>
+            <p class="card-value">0</p>
+            <p class="card-unit">일</p>
+        </div>
+
+        <!-- Average Calories Card -->
+        <div class="card">
+            <div class="card-icon-container average-calories-icon-bg">
+                <svg class="card-icon" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 16 16">
+                    <path d="M8.5 3a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2a.5.5 0 0 1 .5-.5zM8 8a.5.5 0 0 1 .5-.5v2a.5.5 0 0 1-1 0V8.5a.5.5 0 0 1 .5-.5zM3 8a.5.5 0 0 1 .5-.5h2a.5.5 0 0 1 0 1h-2A.5.5 0 0 1 3 8zm6 0a.5.5 0 0 1 .5-.5h2a.5.5 0 0 1 0 1h-2a.5.5 0 0 1-.5-.5zM8 3a.5.5 0 0 1 .5-.5h.914a.5.5 0 0 1 .353.147l2.854 2.854A.5.5 0 0 1 12.586 6H13a.5.5 0 0 1 0 1h-.914a.5.5 0 0 1-.353-.147l-2.854-2.854A.5.5 0 0 1 8.5 3H9a.5.5 0 0 1 0-1h-.5a.5.5 0 0 1-.5-.5zM3 8a.5.5 0 0 1 .5-.5h.914a.5.5 0 0 1 .353.147l2.854 2.854a.5.5 0 0 1-.353.854H6a.5.5 0 0 1 0-1h-.5a.5.5 0 0 1-.5-.5z"/>
+                </svg>
+            </div>
+            <h3 class="card-title">평균 칼로리</h3>
+            <p class="card-value">0</p>
+            <p class="card-unit">kcal</p>
+        </div>
+
+        <!-- Max Calories Card -->
+        <div class="card">
+            <div class="card-icon-container max-calories-icon-bg">
+                <svg class="card-icon" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 16 16">
+                    <path d="M8 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zm0-1a3 3 0 1 1 0-6 3 3 0 0 1 0 6zm0-7a.5.5 0 0 1 .5.5v3a.5.5 0 0 1-1 0v-3a.5.5 0 0 1 .5-.5zM2.5 4a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2a.5.5 0 0 1 .5-.5zM2.5 10a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2a.5.5 0 0 1 .5-.5zM13.5 4a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2a.5.5 0 0 1 .5-.5zM13.5 10a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2a.5.5 0 0 1 .5-.5zM8 13.5a.5.5 0 0 1 .5.5v1.5a.5.5 0 0 1-1 0V14a.5.5 0 0 1 .5-.5zM8 1a.5.5 0 0 1 .5.5v1.5a.5.5 0 0 1-1 0V1.5a.5.5 0 0 1 .5-.5z"/>
+                </svg>
+            </div>
+            <h3 class="card-title">최고 칼로리</h3>
+            <p class="card-value">0</p>
+            <p class="card-unit">kcal</p>
+        </div>
+    </div>
+
+    <!-- No Records Section -->
+    <div class="no-records-card">
+        <svg class="no-records-icon" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 16 16">
+            <path d="M11 2a1 1 0 0 1 1 1v2a.5.5 0 0 0 1 0V3a2 2 0 0 0-2-2h-1a1 1 0 0 1-1-1zM5 2a1 1 0 0 1 1-1h1a1 1 0 0 1 1 1v2a.5.5 0 0 0 1 0V2a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h1a1 1 0 0 1 1-1v-2a.5.5 0 0 0 1 0v2a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1zM11 14a1 1 0 0 1-1-1v-2a.5.5 0 0 0-1 0v2a2 2 0 0 0 2 2h1a1 1 0 0 0 1-1v-2a.5.5 0 0 0-1 0z"/>
+        </svg>
+        <h2 class="no-records-title">아직 저장된 식단이 없습니다</h2>
+        <p class="no-records-text">식단 관리 탭에서 오늘의 식단을 입력하고 저장해보세요!</p>
+
+        <a href="#" class="cta-button">
+            <svg class="cta-icon" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 16 16">
+                <path d="M8 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM8 3a.5.5 0 0 1 .5.5v3a.5.5 0 0 1-1 0v-3a.5.5 0 0 1 .5-.5zM8 11.5a.5.5 0 0 1 .5.5v1.5a.5.5 0 0 1-1 0V12a.5.5 0 0 1 .5-.5zM4.5 9a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2a.5.5 0 0 1 .5-.5zM4.5 12a.5.5 0 0 1 .5.5v1.5a.5.5 0 0 1-1 0V12.5a.5.5 0 0 1 .5-.5zM11.5 9a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2a.5.5 0 0 1 .5-.5zM11.5 12a.5.5 0 0 1 .5.5v1.5a.5.5 0 0 1-1 0V12.5a.5.5 0 0 1 .5-.5z"/>
+            </svg>
+            식단을 꾸준히 기록하면 건강한 식습관 패턴을 파악할 수 있습니다.
+        </a>
+    </div>
+</div>
+</body>
+</html>

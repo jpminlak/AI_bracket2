@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>음식 분석 & 추천 - 회원정보</title>
+    <link rel="stylesheet" th:href="@{/main.css}">
+    <style>
+        .signup-container {
+            display: flex;
+            justify-content: center;
+            padding: 40px 0;
+        }
+
+        .signup-box {
+            background: #fff;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            width: 50%;
+        }
+
+        .signup-box h2 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 120px 1fr 120px 1fr;
+            align-items: center;
+            gap: 20px;
+            margin-bottom: 15px;
+        }
+
+        .form-row span {
+            padding: 10px;
+            border-radius: 6px;
+            font-size: 14px;
+            color: #555;
+            width: 85%;
+            background-color: #f9f9f9;
+            min-height: 38px;
+            box-sizing: border-box;
+            display: flex;
+            align-items: center;
+        }
+
+        .section {
+            display: block;
+            margin: 20px 0 10px;
+            background: linear-gradient(to right, black, darkgray, white);
+            color: white;
+            font-size: 1.1em;
+            font-weight: bold;
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+
+        /* 버튼 공통 스타일 */
+        .btn-primary,
+        .btn-secondary {
+            padding: 12px 24px;
+            border: none;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 6px;
+            cursor: pointer;
+            text-decoration: none;
+            transition: 0.3s;
+        }
+
+        .btn-primary {
+            background: black;
+            color: white;
+            width: 100%;
+            display: block;
+        }
+
+        .btn-primary:hover {
+            background: #acabab;
+            color: black;
+        }
+
+        .btn-secondary {
+            background: black;
+            color: white;
+            font-size: 14px;
+        }
+
+        .btn-secondary:hover {
+            background: #acabab;
+            color: black;
+        }
+
+        /* 버튼 레이아웃 */
+        .row-btn {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            margin-top: 20px;
+        }
+
+        .center-row {
+            justify-content: center;
+            text-align: center;
+        }
+
+        .right-row {
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <header th:replace="~{common:: header}"></header>
+
+    <main>
+        <div class="signup-container">
+            <div class="signup-box">
+                <h2>내 정보</h2>
+
+                <span class="section">기본 정보</span>
+                <div class="form-row">
+                    <label>ID</label>
+                    <span th:text="${#authentication.principal.member.memberId}"></span>
+                    <label>이름</label>
+                    <span th:text="${#authentication.principal.member.memberName}"></span>
+                </div>
+                <div class="form-row">
+                    <label>성별</label>
+                    <span th:text="${#authentication.principal.member.sex}"></span>
+                    <label>생년월일</label>
+                    <span th:text="${#authentication.principal.member.birthday}"></span>
+                </div>
+
+                <span class="section">신체 정보</span>
+                <div class="form-row">
+                    <label>신장</label>
+                    <span th:text="${#authentication.principal.member.height} + ' cm'"></span>
+                    <label>체중</label>
+                    <span th:text="${#authentication.principal.member.weight} + ' kg'"></span>
+                </div>
+
+                <span class="section">연락처 정보 (선택사항)</span>
+                <div class="form-row">
+                    <label>이메일</label>
+                    <span th:text="${#authentication.principal.member.email}"></span>
+                    <label>전화번호</label>
+                    <span th:text="${#authentication.principal.member.tel}"></span>
+                </div>
+
+                <span class="section">기타</span>
+                <div class="form-row">
+                    <label>가입일</label>
+                    <span
+                        th:text="${#temporals.format(#authentication.principal.member.regDate, 'yyyy-MM-dd HH:mm:ss')}"></span>
+                    <label>수정일</label>
+                    <span
+                        th:text="${#temporals.format(#authentication.principal.member.uptDate, 'yyyy-MM-dd HH:mm:ss')}"></span>
+                </div>
+
+                <div class="row-btn center-row">
+                    <a th:href="@{/member/modify}" class="btn-primary">회원정보 수정</a>
+                </div>
+                <div class="row-btn right-row">
+                    <a th:href="@{/member/list}" class="btn-secondary" sec:authorize="hasRole('ROLE_ADMIN')">회원목록</a>
+                    <a th:href="@{/member/withdrawal}" class="btn-secondary">회원탈퇴</a>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer th:replace="~{common:: footer}"></footer>
+</body>
+
+</html>

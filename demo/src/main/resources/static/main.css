@@ -1,0 +1,115 @@
+    body {
+        margin: 0;
+        font-family: 'Noto Sans KR', sans-serif;
+        color: #222;
+    }
+
+    header {
+        background: #0b0b1a;
+        color: white;
+        padding: 10px 40px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    main {
+        min-height: 550px;
+    }
+
+    header nav a {
+        margin: 0 10px;
+        color: white;
+        text-decoration: none;
+        font-size: 14px;
+    }
+
+    header nav a:hover {
+        text-decoration: underline;
+    }
+
+    .welcome {
+        font-weight: bold;
+    }
+
+    /* 페이징 */
+    .pagination {
+        margin-top: 20px;
+        text-align: center;
+    }
+
+    .pagination a {
+        margin: 0 4px;
+        padding: 6px 12px;
+        border-radius: 4px;
+        text-decoration: none;
+        color: black;
+        font-weight: bold;
+        border: 1px solid #ddd;
+        background: #fff;
+        transition: .2s;
+    }
+
+    .pagination a:hover {
+        background: #f2f2f2;
+    }
+
+    .pagination .active {
+        background: black;
+        color: #fff;
+        pointer-events: none;
+    }
+
+    .btn-normal {
+        display: inline-block;
+        padding: 10px 20px;
+        margin-top: 20px;
+        text-align: center;
+        font-size: 16px;
+        font-weight: bold;
+        color: #fff;
+        background: #000;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: .3s;
+        text-decoration: none;
+    }
+
+    .btn-normal:hover {
+        background: #acabab;
+        color: #000;
+    }
+
+    footer {
+        background: #0b0b1a;
+        color: #ccc;
+        padding: 30px 50px;
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        font-size: 14px;
+    }
+
+    footer h4 {
+        color: white;
+        margin-bottom: 10px;
+    }
+
+    footer a {
+        color: #ccc;
+        text-decoration: none;
+        display: block;
+        margin: 5px 0;
+    }
+
+    footer a:hover {
+        text-decoration: underline;
+    }
+
+    .footer-bottom {
+        grid-column: span 4;
+        text-align: center;
+        margin-top: 20px;
+        font-size: 12px;
+        color: #777;
+    }

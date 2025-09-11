@@ -1,0 +1,43 @@
+# 터미널에서 입력: pip install -r requirements.txt
+## 만약 UnicodeDecodeError: 'cp949' codec 어쩌구 하는 오류가 나면 우측 하단의 안코딩을 UTF-8로 지정하거나, pip를 업그레이드 해보자.
+## python.exe -m pip install --upgrade pip
+fastapi
+uvicorn[standard]
+python-dotenv
+pydantic
+requests
+tensorflow
+numpy
+pandas
+joblib
+python-multipart
+ultralytics
+transformers
+httpx
+tensorflow
+
+# 그밖에 설치할 파일
+## (터미널) ollama pull qwen2.5:3b-instruct
+# 사진 분석 모델 파일
+## 
+# 기분 분석 모델 파일
+## https://drive.google.com/file/d/1uICUi6SR_DF4DnCRQIjAYydNbMKbzefs/view?usp=drive_link → /Predict/kobert_emotion_model 폴더에 넣기
+
+# 터미널에서 실행해야할 명령어
+## 1. 사진 분석 (101개 클래스)
+## cd Fat_secret
+## uvicorn main:app --port 8002
+
+## 1-1. 사진 분석 (12개 클래스)
+## uvicorn photo_.app:app --reload
+## 테스트용(임시. 안해도 됨.) - 명령 프롬프트(cmd)에서 실행: curl -X POST "http://127.0.0.1:8000/upload/" ^ More? -H "accept: application/json" ^ More? -H "Content-Type: multipart/form-data" ^ More? -F "file=@D:\salad.jpg"
+
+# 실행해야할 Python 파일들
+## 2. 추천 식단
+## Ollama 실행시켜야 함
+## /MealMind/app.py
+## http://127.0.0.1:8001/health    // 동작 확인. 그냥 접속하면 http://127.0.0.1:8001/ 로 가서 작동을 하지 않을 수 있다. 반드시 /ping을 덧붙이자.
+
+## 3. 기분 추천
+## uvicorn Predict.app:app --host 127.0.0.1 --port 8002
+## 또는 uvicorn Predict.app:app --reload --port 8004 // 파일 실행 명령문 CD로 Predict 파일로 들어와서 실행시켜야 합니다. 그리고 프로젝트를 바탕화면에 두면안되고 C드라이브에로 옮긴후 실행해주세요

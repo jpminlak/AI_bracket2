@@ -1,6 +1,6 @@
 # main.py 파일
 # pip install tensorflow==2.18
-# uvicorn main:app --port 8002
+# uvicorn Fat_secret.main:app --port 8002
 from fastapi import FastAPI, UploadFile, File, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 import numpy as np

@@ -121,35 +121,7 @@
 <img width="561" height="441" alt="image" src="https://github.com/user-attachments/assets/c53e5b5a-60e1-484a-81c6-416e6c09755c" />
 
 ### **📂 파일 구조도**
-📦Final
- ┣ 📂demo
- ┃ ┣ 📂src
- ┃ ┃ ┣ 📜DemoApplication.java
- ┃ ┃ ┗ 📂resources
- ┃ ┃ ┃ ┣ 📂static
- ┃ ┃ ┃ ┃ ┗ 📜main.css
- ┃ ┃ ┃ ┣ 📂templates
- ┃ ┃ ┃ ┃ ┣ 📜common.html
- ┃ ┃ ┃ ┃ ┗ 📜main.html
- ┃ ┃ ┃ ┗ 📜application.properties
- ┃ ┣ 📜build.gradle
- ┣ 📂FastAPI
- ┃ ┣ 📜main.py
- ┣ 📂MealMind
- ┃ ┣ 📜app.py
- ┣ 📂photo_
- ┃ ┣ 📂dataset
- ┃ ┃ ┗ 📜food.csv
- ┃ ┣ 📂model
- ┃ ┃ ┗ 📜foodim9.keras
- ┃ ┣ 📜app.py
- ┃ ┣ 📜fatsecretapi.py
- ┃ ┣ 📜main.py
- ┃ ┗ 📜model_efB0_local_fixed.keras
- ┣ 📂Predict
- ┃ ┣ 📂kobert_emotion_model
- ┃ ┗ 📜app.py
- ┗ 📜requirements.txt
+<img width="322" height="633" alt="image" src="https://github.com/user-attachments/assets/bacecb1c-43d3-4204-a8a3-5f4764722f3c" />
 
 
 

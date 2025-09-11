@@ -114,5 +114,45 @@
 ▶ [**📑 요구사항 정의서 바로가기**](https://docs.google.com/spreadsheets/d/1WSLjV17Llg2p0DN2wyvz9vuMrkYNvfDEmSVrAsvDE5U/edit?gid=0#gid=0)
 
 
+# 파일구조도
+
+📦Final
+ ┣ 📂demo
+ ┃ ┣ 📂src
+ ┃ ┃ ┣ 📜DemoApplication.java
+ ┃ ┃ ┗ 📂resources
+ ┃ ┃ ┃ ┣ 📂static
+ ┃ ┃ ┃ ┃ ┗ 📜main.css
+ ┃ ┃ ┃ ┣ 📂templates
+ ┃ ┃ ┃ ┃ ┣ 📜common.html
+ ┃ ┃ ┃ ┃ ┗ 📜main.html
+ ┃ ┃ ┃ ┗ 📜application.properties
+ ┃ ┣ 📜build.gradle
+ ┣ 📂FastAPI
+ ┃ ┣ 📜main.py
+ ┣ 📂MealMind
+ ┃ ┣ 📜app.py
+ ┣ 📂photo_
+ ┃ ┣ 📂dataset
+ ┃ ┃ ┗ 📜food.csv
+ ┃ ┣ 📂model
+ ┃ ┃ ┗ 📜foodim9.keras
+ ┃ ┣ 📜app.py
+ ┃ ┣ 📜fatsecretapi.py
+ ┃ ┣ 📜main.py
+ ┃ ┗ 📜model_efB0_local_fixed.keras
+ ┣ 📂Predict
+ ┃ ┣ 📂kobert_emotion_model
+ ┃ ┗ 📜app.py
+ ┗ 📜requirements.txt
+
+ # 서비스 화면
+ 
+ - 메인화면
+  <img width="499" height="356" alt="image" src="https://github.com/user-attachments/assets/96f1ef39-29cd-4d26-a687-c5d8be752070" />
+
+ - 음식분석
+<img width="561" height="441" alt="image" src="https://github.com/user-attachments/assets/ab402982-8d80-4260-b198-24b5a83a1229" />
+
 
 

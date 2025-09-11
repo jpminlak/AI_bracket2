@@ -116,7 +116,7 @@
 ### **서비스 화면**
 - 메인화면
 <img width="499" height="356" alt="image" src="https://github.com/user-attachments/assets/98b78f6a-e75e-4b4c-b137-fd1a9d0f7cd7" />
-<br>
+
 - 음식분석
 <img width="561" height="441" alt="image" src="https://github.com/user-attachments/assets/c53e5b5a-60e1-484a-81c6-416e6c09755c" />
 

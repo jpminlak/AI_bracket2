@@ -205,10 +205,10 @@
                 <form method="post" th:action="@{/diet/save}" style="display: inline;">
                     <input type="hidden" name="dietDate" th:value="${dietDate}">
                     <input type="hidden" th:name="${mealTime}" th:value="${foodNamesString}">
-                    <input type="hidden" th:name="${mealTime + '_kcal'}" th:value="${totalCalories}">
-                    <input type="hidden" th:name="${mealTime + '_carbs'}" th:value="${totalCarbs}">
-                    <input type="hidden" th:name="${mealTime + '_protein'}" th:value="${totalProtein}">
-                    <input type="hidden" th:name="${mealTime + '_fat'}" th:value="${totalFat}">
+                    <input type="hidden" th:name="${mealTime + '_kcal'}" th:value="${#numbers.formatDecimal(totalCalories, 0, 2)}">
+                    <input type="hidden" th:name="${mealTime + '_carbs'}" th:value="${#numbers.formatDecimal(totalCarbs, 0, 2)}">
+                    <input type="hidden" th:name="${mealTime + '_protein'}" th:value="${#numbers.formatDecimal(totalProtein, 0, 2)}">
+                    <input type="hidden" th:name="${mealTime + '_fat'}" th:value="${#numbers.formatDecimal(totalFat, 0, 2)}">
                     <button class="btn btn-save" type="submit">이 식단 저장</button>
                 </form>
                 <a href="/diet" class="btn btn-back">식단 화면으로 돌아가기</a>

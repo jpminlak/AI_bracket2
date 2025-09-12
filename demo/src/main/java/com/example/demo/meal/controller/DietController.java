@@ -214,7 +214,6 @@ public class DietController {
             @RequestParam(name = "dinner_fat", required = false) Double dinnerFat,
             @RequestParam(name = "dietDate") String dietDateStr,
             Authentication auth
-
     ) {
         Member me = AuthUtils.resolveCurrentMember(auth, memberService);
         LocalDate dietDate = LocalDate.parse(dietDateStr);
@@ -226,27 +225,35 @@ public class DietController {
             diet.setDietDate(dietDate);
         }
 
+        // --- 메뉴 이름 합치기 ---
         diet.setBreakfast(mergeMeals(diet.getBreakfast(), breakfast));
         diet.setLunch(mergeMeals(diet.getLunch(), lunch));
         diet.setDinner(mergeMeals(diet.getDinner(), dinner));
 
-        diet.setBreakfastKcal(defaultZero(breakfastKcal));
-        diet.setLunchKcal(defaultZero(lunchKcal));
-        diet.setDinnerKcal(defaultZero(dinnerKcal));
+        // --- 아침 영양소 ---
+        if (breakfastKcal != null) diet.setBreakfastKcal(breakfastKcal);
+        if (breakfastCarbs != null) diet.setBreakfastCarbs(breakfastCarbs);
+        if (breakfastProtein != null) diet.setBreakfastProtein(breakfastProtein);
+        if (breakfastFat != null) diet.setBreakfastFat(breakfastFat);
 
-        diet.setBreakfastCarbs(defaultZero(breakfastCarbs));
-        diet.setBreakfastProtein(defaultZero(breakfastProtein));
-        diet.setBreakfastFat(defaultZero(breakfastFat));
+        // --- 점심 영양소 ---
+        if (lunchKcal != null) diet.setLunchKcal(lunchKcal);
+        if (lunchCarbs != null) diet.setLunchCarbs(lunchCarbs);
+        if (lunchProtein != null) diet.setLunchProtein(lunchProtein);
+        if (lunchFat != null) diet.setLunchFat(lunchFat);
 
-        diet.setLunchCarbs(defaultZero(lunchCarbs));
-        diet.setLunchProtein(defaultZero(lunchProtein));
-        diet.setLunchFat(defaultZero(lunchFat));
+        // --- 저녁 영양소 ---
+        if (dinnerKcal != null) diet.setDinnerKcal(dinnerKcal);
+        if (dinnerCarbs != null) diet.setDinnerCarbs(dinnerCarbs);
+        if (dinnerProtein != null) diet.setDinnerProtein(dinnerProtein);
+        if (dinnerFat != null) diet.setDinnerFat(dinnerFat);
 
-        diet.setDinnerCarbs(defaultZero(dinnerCarbs));
-        diet.setDinnerProtein(defaultZero(dinnerProtein));
-        diet.setDinnerFat(defaultZero(dinnerFat));
-
-        diet.setTotalKcal(diet.getBreakfastKcal() + diet.getLunchKcal() + diet.getDinnerKcal());
+        // --- 총 칼로리 다시 계산 ---
+        double totalKcal =
+                defaultZero(diet.getBreakfastKcal()) +
+                        defaultZero(diet.getLunchKcal()) +
+                        defaultZero(diet.getDinnerKcal());
+        diet.setTotalKcal(totalKcal);
 
         dietService.saveDiet(diet);
 

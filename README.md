@@ -104,6 +104,7 @@
 
 > 📌 **개인에게 최적화된 칼로리를 계산해, 가장 효율적인 식단 솔루션을 제공!**
 
+---
 # 🗂️ 프로젝트 기획
 
 <br>
@@ -113,14 +114,26 @@
 
 ▶ [**📑 요구사항 정의서 바로가기**](https://docs.google.com/spreadsheets/d/1WSLjV17Llg2p0DN2wyvz9vuMrkYNvfDEmSVrAsvDE5U/edit?gid=0#gid=0)
 
-### **서비스 화면**
+<br>
+
+---
+## 🖥️ 서비스 화면
 - 메인화면
-<img width="499" height="356" alt="image" src="https://github.com/user-attachments/assets/98b78f6a-e75e-4b4c-b137-fd1a9d0f7cd7" />
+<img width="550" height="500" alt="image" src="https://github.com/user-attachments/assets/a58c5546-000b-49e5-9199-ca4e94233493" />
 
 - 음식분석
-<img width="561" height="441" alt="image" src="https://github.com/user-attachments/assets/c53e5b5a-60e1-484a-81c6-416e6c09755c" />
+<img width="550" height="500" alt="image" src="https://github.com/user-attachments/assets/c53e5b5a-60e1-484a-81c6-416e6c09755c" />
 
-### **📂 파일 구조도**
+- 식단 추천
+<img width="550" height="500" alt="image" src="https://github.com/user-attachments/assets/93aaab77-9342-4a5f-9b6f-1fb23174cefb" />
+
+- 기록
+<img width="550" height="500" alt="image" src="https://github.com/user-attachments/assets/fc54f221-1610-4689-b17c-038cd72200e9" />
+
+<br>
+
+---
+## 📂 파일 구조도
 <img width="322" height="633" alt="image" src="https://github.com/user-attachments/assets/bacecb1c-43d3-4204-a8a3-5f4764722f3c" />
 
 

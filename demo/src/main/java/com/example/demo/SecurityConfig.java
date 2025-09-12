@@ -30,7 +30,7 @@ public class SecurityConfig {
                         //.requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll()   // 가장 먼저 정적 리소스에 대한 접근을 모두 허용
                         .requestMatchers("/css/**", "/js/**", "/images/**").permitAll() // 가장 먼저 정적 리소스(CSS, JS, 이미지 등)도 모든 사용자가 접근 가능하도록 설정
                         .requestMatchers("/main.css", "/logo.png").permitAll()
-                        .requestMatchers("/", "/member/login", "/member/signup", "/terms", "/notice", "/notice/{id}").permitAll()  // 로그아웃 상태에서도 접근 가능한 경로들
+                        .requestMatchers("/", "/member/login", "/member/signup", "/member/bye", "/terms", "/notice", "/notice/{id}").permitAll()  // 로그아웃 상태에서도 접근 가능한 경로들
                         .anyRequest().authenticated())  // 위에 명시된 경로를 제외한 모든 경로는 인증된 사용자(로그인한 사용자)만 접근 가능
                 .formLogin((formLogin) -> formLogin
                         .loginPage("/member/login")

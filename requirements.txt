@@ -14,7 +14,10 @@ python-multipart
 ultralytics
 transformers
 httpx
-tensorflow
+faiss-cpu
+sentence-transformers
+torch
+tf-keras
 
 # 그밖에 설치할 파일
 ## (터미널) ollama pull qwen2.5:3b-instruct
@@ -38,6 +41,6 @@ tensorflow
 ## /MealMind/app.py
 ## http://127.0.0.1:8001/health    // 동작 확인. 그냥 접속하면 http://127.0.0.1:8001/ 로 가서 작동을 하지 않을 수 있다. 반드시 /ping을 덧붙이자.
 
-## 3. 기분 추천
-## uvicorn Predict.app:app --host 127.0.0.1 --port 8002
-## 또는 uvicorn Predict.app:app --reload --port 8004 // 파일 실행 명령문 CD로 Predict 파일로 들어와서 실행시켜야 합니다. 그리고 프로젝트를 바탕화면에 두면안되고 C드라이브에로 옮긴후 실행해주세요
+## 3. 기분 추천 (터미널)
+## cd Predict
+## uvicorn app:app --reload --port 8004

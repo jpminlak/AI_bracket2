@@ -72,6 +72,17 @@
             font-size: 16px;
             margin-bottom: 10px;
         }
+
+        .meal-row {
+            display: flex;
+            justify-content: space-between;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .meal-section {
+            flex: 1;
+        }
     </style>
 </head>
 
@@ -130,64 +141,69 @@
             <div class="section">
                 <h3 style="text-align:center;">오늘의 식단 현황</h3>
 
-                <!-- 아침 식사 -->
-                <div class="meal-section">
-                    <div class="meal-title">아침</div>
-                    <table>
-                        <tbody>
-                            <tr th:each="i : ${#numbers.sequence(0,4)}">
-                                <td><input type="text" readonly
-                                        th:value="${i < breakfastList.size() ? breakfastList[i].foodName : ''}" /></td>
-                            </tr>
-                        </tbody>
-                    </table>
-                    <div class="nutrition-info" th:if="${breakfastList.size() > 0}">
-                        칼로리: <span th:text="${#numbers.formatDecimal(breakfastCalories, 0, 1)}">0</span> kcal ·
-                        탄수화물: <span th:text="${#numbers.formatDecimal(breakfastCarbs, 0, 1)}">0</span> g ·
-                        단백질: <span th:text="${#numbers.formatDecimal(breakfastProtein, 0, 1)}">0</span> g ·
-                        지방: <span th:text="${#numbers.formatDecimal(breakfastFat, 0, 1)}">0</span> g
+                <!-- 가로 정렬용 컨테이너 -->
+                <div class="meal-row">
+                    <!-- 아침 식사 -->
+                    <div class="meal-section">
+                        <div class="meal-title">아침</div>
+                        <table>
+                            <tbody>
+                                <tr th:each="i : ${#numbers.sequence(0,4)}">
+                                    <td><input type="text" readonly
+                                            th:value="${i < breakfastList.size() ? breakfastList[i].foodName : ''}" />
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <div class="nutrition-info" th:if="${breakfastList.size() > 0}">
+                            칼로리: <span th:text="${#numbers.formatDecimal(breakfastCalories, 0, 1)}">0</span> kcal ·
+                            탄수화물: <span th:text="${#numbers.formatDecimal(breakfastCarbs, 0, 1)}">0</span> g ·
+                            단백질: <span th:text="${#numbers.formatDecimal(breakfastProtein, 0, 1)}">0</span> g ·
+                            지방: <span th:text="${#numbers.formatDecimal(breakfastFat, 0, 1)}">0</span> g
+                        </div>
+                    </div>
+
+                    <!-- 점심 식사 -->
+                    <div class="meal-section">
+                        <div class="meal-title">점심</div>
+                        <table>
+                            <tbody>
+                                <tr th:each="i : ${#numbers.sequence(0,4)}">
+                                    <td><input type="text" readonly
+                                            th:value="${i < lunchList.size() ? lunchList[i].foodName : ''}" /></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <div class="nutrition-info" th:if="${lunchList.size() > 0}">
+                            칼로리: <span th:text="${#numbers.formatDecimal(lunchCalories, 0, 1)}">0</span> kcal ·
+                            탄수화물: <span th:text="${#numbers.formatDecimal(lunchCarbs, 0, 1)}">0</span> g ·
+                            단백질: <span th:text="${#numbers.formatDecimal(lunchProtein, 0, 1)}">0</span> g ·
+                            지방: <span th:text="${#numbers.formatDecimal(lunchFat, 0, 1)}">0</span> g
+                        </div>
+                    </div>
+
+                    <!-- 저녁 식사 -->
+                    <div class="meal-section">
+                        <div class="meal-title">저녁</div>
+                        <table>
+                            <tbody>
+                                <tr th:each="i : ${#numbers.sequence(0,4)}">
+                                    <td><input type="text" readonly
+                                            th:value="${i < dinnerList.size() ? dinnerList[i].foodName : ''}" /></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <div class="nutrition-info" th:if="${dinnerList.size() > 0}">
+                            칼로리: <span th:text="${#numbers.formatDecimal(dinnerCalories, 0, 1)}">0</span> kcal ·
+                            탄수화물: <span th:text="${#numbers.formatDecimal(dinnerCarbs, 0, 1)}">0</span> g ·
+                            단백질: <span th:text="${#numbers.formatDecimal(dinnerProtein, 0, 1)}">0</span> g ·
+                            지방: <span th:text="${#numbers.formatDecimal(dinnerFat, 0, 1)}">0</span> g
+                        </div>
                     </div>
                 </div>
 
-                <!-- 점심 식사 -->
-                <div class="meal-section">
-                    <div class="meal-title">점심</div>
-                    <table>
-                        <tbody>
-                            <tr th:each="i : ${#numbers.sequence(0,4)}">
-                                <td><input type="text" readonly
-                                        th:value="${i < lunchList.size() ? lunchList[i].foodName : ''}" /></td>
-                            </tr>
-                        </tbody>
-                    </table>
-                    <div class="nutrition-info" th:if="${lunchList.size() > 0}">
-                        칼로리: <span th:text="${#numbers.formatDecimal(lunchCalories, 0, 1)}">0</span> kcal ·
-                        탄수화물: <span th:text="${#numbers.formatDecimal(lunchCarbs, 0, 1)}">0</span> g ·
-                        단백질: <span th:text="${#numbers.formatDecimal(lunchProtein, 0, 1)}">0</span> g ·
-                        지방: <span th:text="${#numbers.formatDecimal(lunchFat, 0, 1)}">0</span> g
-                    </div>
-                </div>
-
-                <!-- 저녁 식사 -->
-                <div class="meal-section">
-                    <div class="meal-title">저녁</div>
-                    <table>
-                        <tbody>
-                            <tr th:each="i : ${#numbers.sequence(0,4)}">
-                                <td><input type="text" readonly
-                                        th:value="${i < dinnerList.size() ? dinnerList[i].foodName : ''}" /></td>
-                            </tr>
-                        </tbody>
-                    </table>
-                    <div class="nutrition-info" th:if="${dinnerList.size() > 0}">
-                        칼로리: <span th:text="${#numbers.formatDecimal(dinnerCalories, 0, 1)}">0</span> kcal ·
-                        탄수화물: <span th:text="${#numbers.formatDecimal(dinnerCarbs, 0, 1)}">0</span> g ·
-                        단백질: <span th:text="${#numbers.formatDecimal(dinnerProtein, 0, 1)}">0</span> g ·
-                        지방: <span th:text="${#numbers.formatDecimal(dinnerFat, 0, 1)}">0</span> g
-                    </div>
-                </div>
-
-                <div style="text-align:center; margin: 12px 0; font-weight:bold; font-size: 18px;">
+                <!-- 총 칼로리 -->
+                <div style="text-align:center; margin: 20px 0; font-weight:bold; font-size: 18px;">
                     오늘 총 칼로리: <span th:text="${totalCalories}">0</span> kcal
                 </div>
             </div>

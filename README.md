@@ -114,7 +114,7 @@
 
 ▶ [**📑 요구사항 정의서 바로가기**](https://docs.google.com/spreadsheets/d/1WSLjV17Llg2p0DN2wyvz9vuMrkYNvfDEmSVrAsvDE5U/edit?gid=0#gid=0)
 
-▶ [**📥 감정 분석 & 추천 모델 링크**](https://drive.google.com/file/d/1uICUi6SR_DF4DnCRQIjAYydNbMKbzefs/view)
+▶ [**📥 감정 분석 & 추천 모델 다운로드 링크**](https://drive.google.com/file/d/1uICUi6SR_DF4DnCRQIjAYydNbMKbzefs/view)
 <br>
 
 ---

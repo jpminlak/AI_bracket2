@@ -135,7 +135,4 @@
 
 ---
 ## 📂 파일 구조도
-<img width="322" height="633" alt="image" src="https://github.com/user-attachments/assets/bacecb1c-43d3-4204-a8a3-5f4764722f3c" />
-
-
-
+<img width="1713" height="859" alt="image" src="https://github.com/user-attachments/assets/b3071619-c873-4cf5-bcce-865dad07501e" />

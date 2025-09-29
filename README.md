@@ -7,7 +7,7 @@
 
 <div style="center">
 
-🏃🏻‍♀️ [ MealMind 데모 사이트 바로가기]
+# 🏃🏻‍♀️ MealMind Project
 
 </div>
 <tr>
